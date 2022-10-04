@@ -1,0 +1,66 @@
+---
+title: "Seascape Ecology"
+author: "Ryan Reisinger"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  pdf_document:
+    df_print: paged
+  html_document:
+    df_print: paged
+subtitle: "Lab 01 - R Refresher"
+highlight: tango
+urlcolor: blue
+linkcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Learning objectives^[From <https://swcarpentry.github.io/r-novice-gapminder/>]
+
+After working through these materials you should be able to:
+
+1. Describe the purpose and use of each pane in the RStudio IDE.
+2. Locate buttons and options in the RStudio IDE.
+3. Define a variable.
+4. Assign data to a variable.
+5. Manage a workspace in an interactive R session.
+6. Use mathematical and comparison operators.
+7. Call functions.
+8. Manage packages.
+9. To be able to identify the 5 main data types.
+10. To begin exploring data frames, and understand how they are related to vectors, factors and lists.
+11. To be able to ask questions from R about the type, class, and structure of an object.
+
+
+# R and RStudio
+
+For the practical component of this module we will be using the programme **R**, run through the **RStudio** IDE^[An Integrated Development Environment. What's an IDE? <https://www.codecademy.com/article/what-is-an-ide>].
+
+* R <https://www.r-project.org/>
+* Rstudio <https://www.rstudio.com/>
+
+Both programmes should be installed on the computer workstation machines. If you can't find them in the Start menu, try searching for them. If you are using your own machine, please make sure both programmes are installed.
+
+# An R Refresher
+
+In this session we will be using materials from the [Software Carpentry's](https://software-carpentry.org/) [R for Reproducible Scientific Analysis](https://swcarpentry.github.io/r-novice-gapminder/).
+
+This week, we will work through two lessons from the course:
+
+1. Lesson 01 Introduction to R and RStudio: <https://swcarpentry.github.io/r-novice-gapminder/01-rstudio-intro/index.html>
+
+2. Lesson 04 Data Structures <https://swcarpentry.github.io/r-novice-gapminder/04-data-structures-part1/index.html>
+
+# Finding help
+You might also find it useful to work through the following reminder of how to find help in R:
+
+* Lesson 03 Seeking Help <https://swcarpentry.github.io/r-novice-gapminder/03-seeking-help/index.html>
+
+In that lesson, notice the CRAN [task views](https://cran.r-project.org/web/views/), which are useful when you have no idea where to start with a topic. The task views group together packages relevant to a certain topic. For example, look at the task view for analysis of spatiotemporal data: <https://cran.r-project.org/web/views/Spatial.html>.
+
+# Homework
+
+Make sure you have worked through both lessons (01 and 04) from the R for Reproducible Scientific Analysis course.
