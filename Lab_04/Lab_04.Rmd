@@ -274,7 +274,7 @@ We then click on 'Download Raw Data' (double red underline in the screenshot bel
 
 I saved the file, called `AQUA_MODIS.20220801_20220831.L3m.MO.SST.sst.9km.nc` in a folder called `data` in my working folder. Remember, we don't want to touch our raw data and we want to keep it separate from things we are working on and manipulating (e.g, the derived raster `papoue_terra` that I wrote to a file called `test_output.tiff` in the `output` folder).
 
-I've put this file on Blackboard if you want to download it from there instead. Remember to put it in a folder called `data` in your working directory.
+I've put this file on Blackboard if you want to download it from there instead. Remember to put it in a folder called `data` in your working directory. **On Blackboard: Course content -\> Labs -\> Lab 04 - Raster Analysis -\> Files for lab**.
 
 The file has the extension `.nc`, which means it is a NetCDF file, a really common format in oceanography and environmental science. But, this format can be really complicated. Sometimes you are lucky and `terra` can easily understand it. Let's try...
 
@@ -329,7 +329,7 @@ rm(sst, sst_raster)
 tmpFiles(remove = TRUE)
 ```
 
-We'll discuss getting data (including working with NetCDF) in more detail in a later lab, for the moment, let's read in some SST files that I have downloaded and converted raster for this lab.
+We'll discuss getting data (including working with NetCDF) in more detail in a later lab, for the moment, let's read in some SST files that I have downloaded and converted raster for this lab. **On Blackboard: Course content -\> Labs -\> Lab 04 - Raster Analysis -\> Files for lab -\> sst_files.**
 
 There are seven files (all with a .tif extension. Save these inside a folder called `sst_files` in your `data` directory.
 
