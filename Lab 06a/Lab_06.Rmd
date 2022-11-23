@@ -1,0 +1,21 @@
+---
+title: "Seascape Ecology"
+author: "Ryan Reisinger"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  pdf_document:
+    df_print: paged
+  html_document:
+    df_print: paged
+subtitle: "Lab 06a - RMarkdown"
+highlight: tango
+urlcolor: blue
+linkcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
