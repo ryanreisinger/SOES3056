@@ -32,7 +32,7 @@ Remember that these tutorials are all hosted on github (<https://github.com/ryan
 
 You'll often want to use bathymetry data in your work, be it simple for maps, or for seascape analyses. Bathymetry data are 3D: we have x (longitude) and y (latitude) coordinates, and depth values.
 
-There are a few commonly-used sources for global bathymetry data, including ETOPO (<https://www.ngdc.noaa.gov/mgg/global/global.html>) and GEBCO (<https://www.gebco.net/>). You can manually download these data from the websites, but today we'll try and use the `marmap` package () to download data from inside RStudio.
+There are a few commonly-used sources for global bathymetry data, including ETOPO (<https://www.ngdc.noaa.gov/mgg/global/global.html>) and GEBCO (<https://www.gebco.net/>). You can manually download these data from the websites, but today we'll try and use the `marmap` package (https://cran.r-project.org/package=marmap) to download data from inside RStudio.
 
 If you can't get `marmap` to work, I have uploaded the files to Blackboard.
 

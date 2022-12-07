@@ -69,7 +69,7 @@ We first check the coordinate reference system:
 crs(fish_2016)
 ```
 
-It's WGS 1984, with EPSG code 4326 (https://www.epsg.io).
+It's WGS 1984, with EPSG code 4326 (<https://www.epsg.io>).
 
 Notice that the spatial extent (longitude, latitude) is:
 
@@ -246,7 +246,7 @@ Despite the distribution still being skewed even after taking the log (the 'boxe
 
 Let's assume we want to fit some kind of trendline. The first thing we need to do is give our dataframe integer values for the months (currently they are character values). We'll use the `mutate()` and `case_when()` functions. I always find this explainer helpful when using the `case_when` function:
 
-![How to use case_when(). Artwork by Alison Horst https://allisonhorst.com/allison-horst.](Resources/AlisonHorst_case_when.png)
+![How to use case_when(). Artwork by Alison Horst <https://allisonhorst.com/allison-horst>.](Resources/AlisonHorst_case_when.png)
 
 We'll use that example to add our new column for month.
 
@@ -295,4 +295,12 @@ In this example, there is no trend because we have so many zero values!
 
 The last two steps were not very successful, because of the kind of data we were using. It was very sparse: many cells had no vales. As an exercise, starting in class, and carrying on at home, I'd like you to try and implement the workflow above with a different dataset. This is building towards what you will need to do for your workflow assessment.
 
-TODO.
+I've uploaded a set of sea surface temperature files for the eastern North Pacific. I add the daily sea surface temperature on 15 September for each year from 2010-2020 (11 files). Think Marine Heatwaves... ([Oliver et al. 2021](https://doi.org/10.1146/annurev-marine-032720-095144)).
+
+Here is the first example of how you can access the files:
+
+```{r}
+sst_2010 <- rast("https://github.com/ryanreisinger/SOES3056/raw/main/Lab_06b/Resources/annual_sst/sst_2010.tif")
+
+plot(sst_2010)
+```
