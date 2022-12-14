@@ -1,0 +1,54 @@
+---
+title: "Seascape Ecology"
+subtitle: "General notes"
+author: "Ryan Reisinger"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Tracking data
+
+## Filtering tracking data
+
+Argos animal tracking data locations have different accuracies, indicated by the 'location class'. From the Argos page (<https://www.argos-system.org/support-and-help/faq-localisation-argos/>):
+
+> -   classes 0, 1, 2, 3 indicate that the location was obtained with 4 messages or more and provides the accuracy estimation,
+>
+> -   class A indicates that the location was obtained with 3 messages,
+>
+> -   class B indicates that the location was obtained with 2 messages,
+>
+> -   class G indicates that the location is a GPS fix obtained by a GPS receiver attached to the platform. The accuracy is better than 100 meters.
+>
+> -   class Z indicates that the location process failed.
+>
+> The accuracy cannot be estimated for classes A and B (not enough messages).
+
+See more in [Irvine et al.](https://animalbiotelemetry.biomedcentral.com/articles/10.1186/s40317-020-00207-x), [Costa et al.](https://doi.org/10.1371/journal.pone.0008677) and [Douglas et al.](https://doi.org/10.1111/j.2041-210X.2012.00245.x), for example.
+
+We therefore need to filter these tracking data. We can use the `argosfilter` package (<https://cran.r-project.org/web/packages/argosfilter/index.html>) which has a simple speed filter (function `vmask()`) which excludes unrealistic location estimates based on their speed, and a speed-distance-angle filter (function `sdafilter()`), which takes into account the turning angle too.
+
+You could also fit various state-space models, which fit a movement model to the tracking data and estimate likely locations, possibly at fixed time intervals (remember, Argos locations are not necessarily at fixed intervals, especially for diving animals).
+
+Examples are Ian Jonsen's `bsam` (<https://cran.r-project.org/web/packages/bsam/index.html>) and `aniMotum` (<https://ianjonsen.github.io/aniMotum/>) packages, and Devin Johnson et al.'s `crawl` package (<https://cran.r-project.org/web/packages/crawl/index.html>). These are much more complicated to use than simple filtering, but can provide extra information like behavioural states.
+
+# Colour palettes
+
+The `viridis` package (<https://cran.r-project.org/web/packages/>) contains good colourblind-safe colour palettes that can be used with `ggplot2`. See the introduction at: <https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html>
+
+```{r, eval = FALSE}
+library(ggplot2)
+
+?ggplot2::scale_colour_viridis_c()
+
+ggplot2::ggplot()+
+  scale_colour_viridis(limts=c(0,100),oob=scales::squish,values=c(0,0.25,0.4,1))
+```
+
+A huge variety of colour palettes from different packages and resources is indexed on this page:
+
+<https://github.com/EmilHvitfeldt/r-color-palettes>
