@@ -36,7 +36,9 @@ Refer back to Lab 04 where you practiced using the `marmap` package (<https://cr
 
 This tutorial by [David March](https://scholar.google.com/citations?user=xABsDpAAAAAJ&hl=en&oi=ao) has a step-by-step video and the associated materials are available at: <https://atlas.mercator-ocean.fr/s/dCTPqL77Ydposfi>. The NetCDF (`.nc`) file that David downloads (`download.file()` function) and then reads in (`nc_open()` function) is hosted on his Github page (and is also contained in the training materials), but is originally downloaded directly from Copernicus Marine. For example, you can look at all the products with a global spatial coverage at: <https://data.marine.copernicus.eu/products?facets=areas%7EGlobal+Ocean>
 
-Once you have selected a data product you are interested in, click on the 'data access' button in the toolbar on the left, which will bring up several download options. You will need to register for a free account first. You could, for example, click on the 'FTP' link to access the folder and raw files directly using FTP (e.g., <ftp://nrt.cmems-du.eu/Core/GLOBAL_ANALYSISFORECAST_PHY_001_024/cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m>), or click on the 'MOTU' link to enter parameters (like spatial and temporal extent) and then download the resulting `.nc` file.
+Once you have selected a data product you are interested in, click on the 'data access' button in the toolbar on the left, which will bring up several download options. You will need to register for a free account first. You could, for example, click on the 'FTP' link to access the folder and raw files directly using FTP (e.g., <ftp://nrt.cmems-du.eu/Core/GLOBAL_ANALYSISFORECAST_PHY_001_024/cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m>), or click on the 'MOTU' link to enter parameters (like spatial and temporal extent) and then download the resulting `.nc` file. You can explore the dataset visually by clicking on the map icon at top right.
+
+[![Figure 1. Exploring a data product visually by clicking the on the map icon.](resources/Copernicus_screenshot.jpg)](Figure 1)
 
 You could also explore and download products through their MyOcean Pro visualisation tool: <https://data.marine.copernicus.eu/viewer/expert>.
 
@@ -58,7 +60,7 @@ For example, I went to the search page, typed "chlorophyll global" in the "Full 
 
 Take note of the dataset ID found near the top of the page and also in the website URL: 'erdMH1chlamday_R2022NRT'. You can use this ID later in the `rerddap` package. I left the time dimension as-is, and I left the latitude and longitude as-is. This should give me the latest available global file. Select '.nc' in the File type dropdown, and click 'Submit'.
 
-[![Figure 1. Screenshot of the ERDDAP download page.](resources/ERDDAP_screenshot.jpg)](Figure%201)
+[![Figure 2. Screenshot of the ERDDAP download page.](resources/ERDDAP_screenshot.jpg)](Figure%202)
 
 Be patient once you have clicked submit, it takes a while. This generates a pretty big file (\~150 MB) that you can download. You may wish to change the spatial extent (the latitude and longitude) so the download is smaller. I changed mine to -20 - +20 latitude and -10 - +10 longitude for this example.
 
