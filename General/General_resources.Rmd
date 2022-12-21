@@ -34,7 +34,11 @@ We therefore need to filter these tracking data. We can use the `argosfilter` pa
 
 You could also fit various state-space models, which fit a movement model to the tracking data and estimate likely locations, possibly at fixed time intervals (remember, Argos locations are not necessarily at fixed intervals, especially for diving animals).
 
-Examples are Ian Jonsen's `bsam` (<https://cran.r-project.org/web/packages/bsam/index.html>) and `aniMotum` (<https://ianjonsen.github.io/aniMotum/>) packages, and Devin Johnson et al.'s `crawl` package (<https://cran.r-project.org/web/packages/crawl/index.html>). These are much more complicated to use than simple filtering, but can provide extra information like behavioural states.
+Examples are Jonsen's `bsam` (<https://cran.r-project.org/web/packages/bsam/index.html>) and `aniMotum` (<https://ianjonsen.github.io/aniMotum/>) packages, and Johnson et al.'s `crawl` package (<https://cran.r-project.org/web/packages/crawl/index.html>). These are much more complicated to use than simple filtering, but can provide extra information like behavioural states.
+
+## Analyses
+
+Joo et al. (<https://doi.org/10.1111/1365-2656.13116>) provide a thorough overview of packages for analysing animal movement data.
 
 # Colour palettes
 
