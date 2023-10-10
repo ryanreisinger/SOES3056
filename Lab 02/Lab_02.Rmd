@@ -3,10 +3,10 @@ title: "Seascape Ecology"
 author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
-  html_document:
-    df_print: paged
   word_document: default
   pdf_document:
+    df_print: paged
+  html_document:
     df_print: paged
 subtitle: "Lab 02 - Scripts, project management, and workflows"
 highlight: tango
@@ -49,9 +49,9 @@ Welcome to the second computer lab for Seascape Ecology.
 
 In the previous lab we dusted off our knowledge of R and RStudio, using two lessons from Software Carpentry’s R for Reproducible Scientific Analysis course:
 
-1. Lesson 01 Introduction to R and RStudio <https://swcarpentry.github.io/r-novice-gapminder/01-rstudio-intro/index.html>
+1. Lesson 01 Introduction to R and RStudio <https://swcarpentry.github.io/r-novice-gapminder/01-rstudio-intro.html>
 
-2. Lesson 04 Data Structures <https://swcarpentry.github.io/r-novice-gapminder/04-data-structurespart1/index.html>
+2. Lesson 04 Data Structures <https://swcarpentry.github.io/r-novice-gapminder/04-data-structures-part1.html>
 
 
 
@@ -74,7 +74,7 @@ We looked at the five main data types (numeric [double], integer, logical [Boole
 
 I also pointed you to a lesson on finding help in R:
 
-Lesson 03 Seeking Help <https://swcarpentry.github.io/r-novice-gapminder/03-seeking-help/index.html>
+Lesson 03 Seeking Help <https://swcarpentry.github.io/r-novice-gapminder/03-seeking-help.html>
 
 
 # This week
@@ -92,7 +92,7 @@ Part 2
 
 
 ## Resources
-A useful resource, for this week and in general, is the free, open-source book [R for Data Science](https://r4ds.had.co.nz/) by [Hadley Wickham](https://hadley.nz/) (chief scientist at RStudio) and Garrett Grolemund. We'll dip into one of the chapters of the book this week. Be aware that the examples in the book use packages from the ['tidyverse'](https://www.tidyverse.org/), which has slightly different syntax for doing things compared to 'base' R (that is, the 'vanilla' R you're probably used to at the moment). We'll also use two lessons from Software Carpentry again.
+A useful resource, for this week and in general, is the free, open-source book [R for Data Science](https://r4ds.hadley.nz/) by [Hadley Wickham](https://hadley.nz/) (chief scientist at RStudio), Mine Çetinkaya-Rundel and Garrett Grolemund. We'll dip into one of the chapters of the book this week. Be aware that the examples in the book use packages from the ['tidyverse'](https://www.tidyverse.org/), which has slightly different syntax for doing things compared to 'base' R (that is, the 'vanilla' R you're probably used to at the moment). We'll also use two lessons from Software Carpentry again.
 
 
 
@@ -106,13 +106,13 @@ A useful resource, for this week and in general, is the free, open-source book [
 #|   "In [our] model of the data science process you start with data import
 #|   and tidying. Next you understand your data with an iterative cycle of
 #|   transforming, visualizing, and modeling. You finish the process 
-#|   by communicating your results to other humans". From https://r4ds.had.co.nz/explore-intro.html.
+#|   by communicating your results to other humans". From https://r4ds.hadley.nz/intro.
 #| fig-alt: >
 #|   A diagram displaying the data science cycle: Import -> Tidy -> Understand 
 #|   (which has the phases Transform -> Visualize -> Model in a cycle) -> 
 #|   Communicate. Surrounding all of these is Communicate.
 #| out.width: NULL
-knitr::include_graphics("resources/base.png", dpi = 270)
+knitr::include_graphics("resources/base_v2.png", dpi = 270)
 ```
 
 ### What's the point?
@@ -123,8 +123,8 @@ We want to contain include as much of this process in a contained set of files t
 ## Data tidying
 Our first part of this lab tackles the **tidy** step of the process in Figure 1, and continues where we left off last week. Please work through lessons 5 and 6 of the Software Carpentry [R for Reproducible Scientific Analysis](https://swcarpentry.github.io/r-novice-gapminder/) course:
 
-1. Lesson 05: Exploring Data Frames <https://swcarpentry.github.io/r-novice-gapminder/05-data-structures-part2/index.html>.
-2. Lesson 06: Subsetting Data <https://swcarpentry.github.io/r-novice-gapminder/06-data-subsetting/index.html>
+1. Lesson 05: Exploring Data Frames <https://swcarpentry.github.io/r-novice-gapminder/05-data-structures-part2.html>.
+2. Lesson 06: Subsetting Data <https://swcarpentry.github.io/r-novice-gapminder/06-data-subsetting.html>
 
 Mark and I will be walking around to help out and answer questions. We'll take 30 minutes to work through the two exercises, then we'll carry on with Part 2 of the lab together.
 
@@ -160,8 +160,8 @@ R scripts are saved with a .R or .r extension.
 
 ## Projects
 
-Let's work through Wickham and Grolemund's book chapter on Workflow and projects (Chapter 8) together:
+Let's work through Wickham and Grolemund's book chapter on Workflow: scripts and projects (Chapter 7) together:
 
-https://r4ds.had.co.nz/workflow-projects.html
+https://r4ds.hadley.nz/workflow-scripts
 
 
