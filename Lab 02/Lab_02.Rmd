@@ -4,9 +4,9 @@ author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
   word_document: default
-  pdf_document:
-    df_print: paged
   html_document:
+    df_print: paged
+  pdf_document:
     df_print: paged
 subtitle: "Lab 02 - Scripts, project management, and workflows"
 highlight: tango
@@ -127,6 +127,41 @@ Our first part of this lab tackles the **tidy** step of the process in Figure 1,
 2. Lesson 06: Subsetting Data <https://swcarpentry.github.io/r-novice-gapminder/06-data-subsetting.html>
 
 Mark and I will be walking around to help out and answer questions. We'll take 30 minutes to work through the two exercises, then we'll carry on with Part 2 of the lab together.
+
+Before doing Lesson 05, you will need to re-create or re-load the `cats` data from Lesson 04 last week.
+
+```{r}
+# Make the cats dataframe
+cats <- data.frame(coat = c("calico", "black", "tabby"),
+								weight = c(2.1, 5.0, 3.2),
+								likes_string = c(1, 0, 1))
+
+# Or load the cats data from file
+cats <- read.csv("data/feline_data.csv")
+
+# Or get it directly from the internet
+cats <- read.csv("https://raw.githubusercontent.com/swcarpentry/r-novice-gapminder/main/episodes/data/feline-data.csv")
+```
+
+You will also need to download the `gapminder` dataset. If you don't manage to download it from the internet using the following R code, you can download it from Blackboard.
+
+```{r}
+# Download the gapminder file from the internet
+# Remember, check if you have the 'data' folder already
+download.file("https://raw.githubusercontent.com/swcarpentry/r-novice-gapminder/main/episodes/data/gapminder_data.csv",
+              destfile = "data/gapminder_data.csv")
+
+# Load it into your workspace
+gapminder <- read.csv("data/gapminder_data.csv")
+```
+
+You could also read the .csv file directly in from the internet.
+
+```{r}
+# Read the .csv file directly from a URL
+gapminder <- read.csv("https://raw.githubusercontent.com/swcarpentry/r-novice-gapminder/main/episodes/data/gapminder_data.csv")
+
+```
 
 # Part 2 - Workflows and Projects
 ## Scripts

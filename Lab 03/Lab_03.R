@@ -6,7 +6,7 @@
 # install.packages("sf")
 # install.packages("terra")
 # install.packages("spData")
-# install.packages("spDataLarge", repos = "https://nowosad.r-universe.dev")
+# install.packages("spDataLarge", repos = "https://geocompr.r-universe.dev")
 
 # Attach libraries
 library(sf)
@@ -180,7 +180,7 @@ my_rast
 # Look at the functions which give more details:
 dim(my_rast)
 ncell(my_rast)
-res(my_rest) # resolution
+res(my_rast) # resolution
 ext(my_rast) # spatial extent
 crs(my_rast) # its coordinate reference system (CRS) -- see section 7.8 in the book for more details
 

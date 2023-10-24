@@ -11,7 +11,7 @@
 
 <meta name="author" content="Ryan Reisinger" />
 
-<meta name="date" content="2023-10-10" />
+<meta name="date" content="2023-10-11" />
 
 <title>Seascape Ecology</title>
 
@@ -1625,7 +1625,7 @@ display: none;
 <h3 class="subtitle">Lab 02 - Scripts, project management, and
 workflows</h3>
 <h4 class="author">Ryan Reisinger</h4>
-<h4 class="date">2023-10-10</h4>
+<h4 class="date">2023-10-11</h4>
 
 </div>
 
@@ -1749,6 +1749,31 @@ Reproducible Scientific Analysis</a> course:</p>
 <p>Mark and I will be walking around to help out and answer questions.
 We’ll take 30 minutes to work through the two exercises, then we’ll
 carry on with Part 2 of the lab together.</p>
+<p>Before doing Lesson 05, you will need to re-create or re-load the
+<code>cats</code> data from Lesson 04 last week.</p>
+<pre class="r"><code># Make the cats dataframe
+cats &lt;- data.frame(coat = c(&quot;calico&quot;, &quot;black&quot;, &quot;tabby&quot;),
+                                weight = c(2.1, 5.0, 3.2),
+                                likes_string = c(1, 0, 1))
+
+# Or load the cats data from file
+cats &lt;- read.csv(&quot;data/feline_data.csv&quot;)
+
+# Or get it directly from the internet
+cats &lt;- read.csv(&quot;https://raw.githubusercontent.com/swcarpentry/r-novice-gapminder/main/episodes/data/feline-data.csv&quot;)</code></pre>
+<p>You will also need to download the <code>gapminder</code> dataset. If
+you don’t manage to download it from the internet using the following R
+code, you can download it from Blackboard.</p>
+<pre class="r"><code># Download the gapminder file from the internet
+# Remember, check if you have the &#39;data&#39; folder already
+download.file(&quot;https://raw.githubusercontent.com/swcarpentry/r-novice-gapminder/main/episodes/data/gapminder_data.csv&quot;,
+              destfile = &quot;data/gapminder_data.csv&quot;)
+
+# Load it into your workspace
+gapminder &lt;- read.csv(&quot;data/gapminder_data.csv&quot;)</code></pre>
+<p>You could also read the .csv file directly in from the internet.</p>
+<pre class="r"><code># Read the .csv file directly from a URL
+gapminder &lt;- read.csv(&quot;https://raw.githubusercontent.com/swcarpentry/r-novice-gapminder/main/episodes/data/gapminder_data.csv&quot;)</code></pre>
 </div>
 </div>
 <div id="part-2---workflows-and-projects" class="section level1">
