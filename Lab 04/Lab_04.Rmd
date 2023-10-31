@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Welcome to Seascape Ecology Lab 4. Today we will practice reading in raster data, performing some analyses on those data, making simple maps, and writing out (saving) rasters in different formats.
 
-Remember to refer to the [*Geocomputation with R*](https://geocompr.robinlovelace.net/index.html) book for more help, as well as [terra's website](https://rspatial.org/terra/pkg/index.html), especially the [tutorials](https://rspatial.org/terra/spatial/index.html).
+Remember to refer to the [*Geocomputation with R*](https://r.geocompx.org/index.html) book for more help, as well as [terra's website](https://rspatial.org/terra/pkg/index.html).
 
 Remember that these tutorials are all hosted on github (<https://github.com/ryanreisinger/SOES3056>), where you can also find the data and see the R Markdown file used to make the PDF and HTML output. This will be useful for your assessment.
 
@@ -64,6 +64,13 @@ Let's reproduce the example in the `marmap` vignette ['Analysing bathymetric dat
 ```{r}
 # We pass two longitude values and two latidue values to the function to define the extent of the area we want. The resolution argument specifies the resolution of the grid in minutes. We are working with an unprojected coordinate system, in longitude and latitude measured in degrees: each degree is divided into 60 minutes.
 papoue<-getNOAA.bathy(lon1=140,lon2=155, lat1=-13,lat2=0,resolution=4)
+
+# IF THE FUNCTION DOES NOT WORK:
+# If you can't get this function to work (sometimes NOAA's servers get overwhelmed), you can
+# 'uncomment' (by removing the preceding # sign) and run the following line after downloading the file
+# from Blackboard and saving it in a folder called 'data'.
+
+# papoue <- readRDS("./data/papoue.RDS")
 
 # This object is a special kind of raster in marmap's own format. We can see that by asking R about the class:
 class(papoue)
@@ -266,13 +273,13 @@ I went to the NASA Earth Observations website for sea surface temperature data f
 
 MODIS (Moderate Resolution Imaging Spectroradiometer) is a sensor on board NASA's Aqua satellite: <https://modis.gsfc.nasa.gov/>
 
-I chose monthly ('1 mo') data for August 2022, downloaded this as 'GeoTIFF (raster)', at 0.1 degrees resolution.
+I chose monthly ('1 mo') data for August 2023, downloaded this as 'GeoTIFF (raster)', at 0.1 degrees resolution.
 
 We then click on 'Download Raw Data' (double red underline in the screenshot below). You'll need to register (quick and free) to download the data.
 
 ![A screenshot of the download page. I've highlighted with red boxes and underling some of the options I chose.](images/NASA_sst_download_screenshot.png)
 
-I saved the file, called `AQUA_MODIS.20220801_20220831.L3m.MO.SST.sst.9km.nc` in a folder called `data` in my working folder. Remember, we don't want to touch our raw data and we want to keep it separate from things we are working on and manipulating (e.g, the derived raster `papoue_terra` that I wrote to a file called `test_output.tiff` in the `output` folder).
+I saved the file, called `AQUA_MODIS.20230901_20230930.L3m.MO.SST.sst.9km.nc` in a folder called `data` in my working folder. Remember, we don't want to touch our raw data and we want to keep it separate from things we are working on and manipulating (e.g, the derived raster called `papoue_terra` that I wrote to a file called `test_output.tiff` in the `output` folder -- that is a derived output).
 
 I've put this file on Blackboard if you want to download it from there instead. Remember to put it in a folder called `data` in your working directory. **On Blackboard: Course content -\> Labs -\> Lab 04 - Raster Analysis -\> Files for lab**.
 
@@ -280,50 +287,26 @@ The file has the extension `.nc`, which means it is a NetCDF file, a really comm
 
 ```{r}
 # Read in the NetCDF file
-sst <- rast("data/AQUA_MODIS.20220801_20220831.L3m.MO.SST.sst.9km.nc")
+sst <- rast("data/AQUA_MODIS.20230901_20230930.L3m.MO.SST.sst.9km.nc")
 
 # Look at some properties
 sst
 
 # And plot
 plot(sst)
+
+# You will see the plot has two layers -- we want the first one only
+sst <- terra::subset(sst, 1) # Get only layer 1
+
+# Try plotting it again
+plot(sst)
 ```
-
-Immediately we got a warning that the raster had an unknown extent. When we print `sst` we see that the extent is indeed unexpected (try `ext(sst)`): 0, 1, 0, 1. We expect that to be in degrees (longitude and latitude). Also, we see that the coordinate reference system is missing (try `crs(sst)`). When we plot it it looks okay, but notice the values of the axes.
-
-You could look at some tutorials on how to read these NetCDF files into a sensible format (for example [this one](https://rpubs.com/Shanto_khandoker/659894)), but let's again keep it simple and download a GeoTIFF from the site. I go back and click on the image dimensions next to the highest resolution download (0.1 degrees). Highlighted in red in the screenshot below:
-
-![](images/NASA_sst_download_screenshot_02.png)
-
-That allows us to save a file called `MYD28M_2022-08-01_rgb_3600x1800.tiff`, which I also put on Blackboard. This is a raster file; let's read it in.
-
-```{r}
-# Read in the SST raster
-sst_raster <- rast("data/MYD28M_2022-08-01_rgb_3600x1800.tiff")
-
-# Check it's properties
-sst_raster # seems much better
-
-# And plot it
-plot(sst_raster, legend = TRUE) # looks better
-
-# But...
-# No SST values, because this is a GeoTIFF image!
-# The value in each grid cell represents a colour instead of an SST value.
-values(sst_raster)[1:10] # Look at the first ten values, for example
-```
-
-The website says:
-
-> In addition to the standard file formats---JPEG, PNG, GeoTIFF, or GoogleEarth (KMZ)---many (not all) datasets support these "data value" formats. (**Note:** These data values are only approximations based upon the scaled range of the imagery. These values should not be used as scientific absolutes but only for simple analysis.
-
-So, we should use the raw data in the NetCDF file, or find another source for data. This is why it's important to carefully explore our data before we start working with it. It's also an example of some of the frustrating steps we have to work through when finding data to use.
 
 Let's remove the rasters from our workspace before we carry on. They can take up a lot of memory. We take two steps. First, we remove the objects with `rm()`, then we also remove any temporary rasters that we can't see, with `tmpFiles()`.
 
 ```{r}
 # Remove the raster objects
-rm(sst, sst_raster)
+rm(sst)
 
 # Remove any temporary raster files.
 tmpFiles(remove = TRUE)
@@ -447,13 +430,9 @@ install.packages("grec",
 library(grec)
 
 # And run the function
-# grec doesn't yet accept terra rasters, so we first convert our raster to the old raster package raster with
-sst_01_oldstyle <- raster(sst_01)
-# Then we run the function
-sst_fronts <- detectFronts(sst_01_oldstyle)
-# And convert back to terra
-sst_fronts <- rast(sst_fronts)
+sst_fronts <- detectFronts(sst_01)
 
+# And plot
 plot(sst_fronts)
 ```
 

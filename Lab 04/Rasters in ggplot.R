@@ -29,6 +29,8 @@ dim(my_df)
 # We need to convert the raster object into a vector first though
 dim(papoue_raster)
 bathy_vector <- c(as.matrix(papoue_raster))
+# If the preceding line fails, try:
+# bathy_vector <- c(as.array(papoue_raster))
 length(bathy_vector)
 my_df$bathy <- bathy_vector
 
