@@ -1,5 +1,5 @@
 # Script for working through the examples in Lovelace et al. Chapter 2
-# https://geocompr.robinlovelace.net/spatial-class.html
+# https://r.geocompx.org/spatial-class 
 
 
 # If necessary, install libraries
