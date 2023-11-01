@@ -3,10 +3,10 @@ title: "Seascape Ecology"
 author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
+  html_document:
     df_print: paged
   word_document: default
-  html_document:
+  pdf_document:
     df_print: paged
 subtitle: "Lab 04 - Raster Analysis"
 highlight: tango
@@ -312,7 +312,7 @@ rm(sst)
 tmpFiles(remove = TRUE)
 ```
 
-We'll discuss getting data (including working with NetCDF) in more detail in a later lab, for the moment, let's read in some SST files that I have downloaded and converted raster for this lab. **On Blackboard: Course content -\> Labs -\> Lab 04 - Raster Analysis -\> Files for lab -\> sst_files.**
+We'll discuss getting data (including working with NetCDF) in more detail in a later lab, for the moment, let's read in some SST files that I have downloaded and converted raster for this lab. **On Blackboard: Course content -\> Labs -\> Lab 04-\> data-\> sst_files.**
 
 There are seven files (all with a .tif extension. Save these inside a folder called `sst_files` in your `data` directory.
 
