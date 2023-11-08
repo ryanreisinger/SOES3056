@@ -2,6 +2,7 @@
 # EXTENSION: PLOTTING RASTERS WITH GGPLOT
 
 library(ggplot2)
+library(terra)
 library(marmap)
 
 # load in some bathymetry data
