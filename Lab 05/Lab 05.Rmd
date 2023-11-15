@@ -3,8 +3,8 @@ title: "Seascape Ecology"
 author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 subtitle: "Lab 05 - Analysing Animal Movement Data"
 highlight: tango
 urlcolor: blue
@@ -315,7 +315,7 @@ In the plot we can see that the line is initally flat (near-zero displacement), 
 
 # Calculating utilization distributions
 
-We'll use the `adehabitathr` package (<https://cran.r-project.org/web/packages/adehabitatHR/index.html>) to calculate utilisation distributions for our single track. Remember the methods I introdued to you in Lecture 07 (Figure 7.9 in Pittman Chapter 7). There are three 'sibling' adehabitat packages for different analyses ([Calenge 2006](https://doi.org/10.1016/j.ecolmodel.2006.03.017)). Unfortunately, they all still rely on the `sp` package, which you will recall is the older version of `sf`. Nonetheless, they remain a useful and comprehensive set of tools.
+We'll use the `adehabitatHR` package (<https://cran.r-project.org/web/packages/adehabitatHR/index.html>) to calculate utilisation distributions for our single track. Remember the methods I introdued to you in Lecture 07 (Figure 7.9 in Pittman Chapter 7). There are three 'sibling' adehabitat packages for different analyses ([Calenge 2006](https://doi.org/10.1016/j.ecolmodel.2006.03.017)). Unfortunately, they all still rely on the `sp` package, which you will recall is the older version of `sf`. Nonetheless, they remain a useful and comprehensive set of tools.
 
 ## Minimum Convex Polygons
 
