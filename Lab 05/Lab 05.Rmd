@@ -44,7 +44,7 @@ library(marmap)
 First, let's read in the tracking data directly from a URL.
 
 ```{r}
-# We can pass a URL directly to read.csv()
+# We can pass a URL, pointing to the tracking data on Github, directly to read.csv()
 tracks <- read.csv("https://github.com/ryanreisinger/giantPetrels/raw/master/Data/GP_tracks_2019-07-01.csv")
 ```
 
@@ -55,49 +55,60 @@ Let's take a peak at the top of the file.
 head(tracks)
 ```
 
-The date and time are in separate columns and they are also character vectors. So, let's first join those and convert the new column to a column with class `POSIXlt`, used for dates and times.
+The date and time are in two separate columns and they are also character vectors (notice the `<chr>` tag under the column names, and think back to your first lab, on data types).
+
+So, let's first join those two columns (`date` and `time`) into a new column (`date_time`) and convert the new column to a column with class `POSIXlt`, which is a class used in R for dates and times.
 
 ```{r}
 # 'date' and 'time' are currently character vectors
 class(tracks$date) 
 class(tracks$time)
 
-# Join them in a new column
+# Join these two columns in a new column
 tracks$date_time <- paste(tracks$date, tracks$time, sep = " ")
 
 # And convert to a date using the 'strptime' function
+# Notice that we set the timezone (argument 'tz') as 'UTC'
 tracks$date_time <- strptime(tracks$date_time, format = "%Y/%m/%d %H:%M:%S", tz = "UTC")
 
-# Look at the class
+# Look at the class of the new column, to check
 class(tracks$date_time)
+
+# Also look at the first 6 entries of the column to check
+# that the date has been created correctly
+head(tracks$date_time)
 ```
 
-For this analysis, we're only interested in a few of the columns, so let's select those.
+For this analysis, we're only interested in a few of the columns from the data frame, so let's select only those.
 
-`track_id` is the unique id of each track, `date_time` is the date and time, UTC, in POSXIct format, and `decimal_longitude` and `decimal_latitude` are the longitude and latitude, respectively, in the WGS 1984 coordinate reference system that GPSs use.
+`track_id` is the unique id of each track, `date_time` is the date and time, UTC, in POSXIct format (which we just created), and `decimal_longitude` and `decimal_latitude` are the longitude and latitude, respectively, in the WGS 1984 coordinate reference system that GPSs use (remember the lab on coordinate reference systems).
 
 ```{r}
-# Note that I've used dplyr::select() to force R to use the 'select' function from the 'dplyr' package. This is because another package that we use later, adehabitatHR, also has a 'select' function and they 'mask' one another.
+# Note that I've used dplyr::select() to force R to use the 'select' function from the 'dplyr' package. This is because another package that we use later, adehabitatHR, also has a 'select' function and they 'mask' one another (that is, R tries to use the 'select' function from the wrong package, resulting in an error)
 tracks <- dplyr::select(tracks,
                  scientific_name,
                  individual_id,
                  date_time,
                  decimal_longitude,
                  decimal_latitude)
+
+# Look at the first lines of our new data frame, 'tracks'
+head(tracks)
 ```
 
 We can make a quick map of all the tracks.
 
 ```{r}
 # First let's get some map data from the 'rnaturalearth' package.
-# Note that we ask the function to return the data in 'sf' class.
+# Note that we ask the function to return the data in 'sf' class,
+# which works with the 'sf' package.
 world <- ne_countries(scale = "medium", returnclass = "sf")
 
 # Map
 ggplot(data = world) +
     geom_sf()
 
-# And let's add our tracks on top
+# And let's add our bird tracks on top
 ggplot(data = world) +
     geom_sf() +
   geom_point(data = tracks, aes(x = decimal_longitude,
@@ -105,12 +116,13 @@ ggplot(data = world) +
 
 # Let's 'zoom in' on the tracks by limiting the spatial extent of the map
 # according to the tracking data
+# First, we set up the minimum and maximum longitudes (x) and latitudes (y)
 min_x <- min(tracks$decimal_longitude, na.rm = T)
 max_x <- max(tracks$decimal_longitude, na.rm = T)
 min_y <- min(tracks$decimal_latitude, na.rm = T)
 max_y <- max(tracks$decimal_latitude, na.rm = T)
 
-# We add this spatial extent using the 'coord_sf' function
+# We add this spatial extent (these limits) using the 'coord_sf' function
 ggplot(data = world) +
     geom_sf() +
   geom_point(data = tracks, aes(x = decimal_longitude,
@@ -119,7 +131,7 @@ ggplot(data = world) +
             ylim = c(min_y, max_y))
 ```
 
-You can look through [this tutorial](https://r-spatial.org/r/2018/10/25/ggplot2-sf.html) for more ways to improve and customise your maps. But for the moment, let's customise one more thing: we'll specify the tracks to be coloured according to the species, using arguments in the `aes()` function in ggplot. Notice how different the movements of northern and southern giant petrels are.
+You can look through [this tutorial](https://r-spatial.org/r/2018/10/25/ggplot2-sf.html) for more ways to improve and customise your maps. But for the moment, let's customise one more thing on our map: we'll specify the tracks to be coloured according to the species, using arguments in the `aes()` function in `ggplot`. Notice how different the movements of northern and southern giant petrels are.
 
 ```{r}
 ggplot(data = world) +
@@ -131,15 +143,31 @@ ggplot(data = world) +
             ylim = c(min_y, max_y))
 ```
 
-# Basic analyses
-
-For the following analyses, we'll select one individual to work with. Let's use one of the northern giant petrels, track id `NGP03_KD_SEP_2015`.
+We could use the same approach to colour the tracks by individual. Notice that I switch off the legend in `theme` since there are so many individuals.
 
 ```{r}
+ggplot(data = world) +
+    geom_sf() +
+  geom_point(data = tracks, aes(x = decimal_longitude,
+                                y = decimal_latitude,
+                                colour = individual_id)) +
+  coord_sf(xlim = c(min_x, max_x),
+            ylim = c(min_y, max_y)) +
+   theme(legend.position="none")
+```
+
+# Basic analyses
+
+For the following analyses, we'll select one individual to work with. Let's use one of the northern giant petrels, with track id `NGP03_KD_SEP_2015`.
+
+```{r}
+# Select one individual, creating a new dataframe called 'ngp'
+# Again, we use a dplyr function called 'filter'
 ngp <- dplyr::filter(tracks, individual_id == "NGP06_KD_SEP_2015")
 
 # Instead of recalculating the x and y limits manually, we'll calculate 
-# them 'on the fly' inside the ggplot call.
+# them 'on the fly' inside the ggplot call, using the 'min' and 'max'
+# functions.
 
 ggplot(data = world) +
     geom_sf() +
@@ -150,13 +178,29 @@ ggplot(data = world) +
                     max(ngp$decimal_longitude, na.rm = T)),
             ylim = c(min(ngp$decimal_latitude, na.rm = T),
                      max(ngp$decimal_latitude, na.rm = T)))
+
+# We could also make a plot with lines under the points,
+# using the geom_path() layer
+ggplot(data = world) +
+    geom_sf() +
+    geom_path(data = ngp, aes(x = decimal_longitude,
+                                y = decimal_latitude,
+                                colour = scientific_name)) +
+  geom_point(data = ngp, aes(x = decimal_longitude,
+                                y = decimal_latitude,
+                                colour = scientific_name)) +
+  coord_sf(xlim = c(min(ngp$decimal_longitude, na.rm = T),
+                    max(ngp$decimal_longitude, na.rm = T)),
+            ylim = c(min(ngp$decimal_latitude, na.rm = T),
+                     max(ngp$decimal_latitude, na.rm = T)))
 ```
 
-We can calculate some basic parameters from the track, starting with the duration (or spatial extent).
+We can calculate some basic parameters from the track, starting with the duration of the track and its spatial extent.
 
 ```{r}
 start_date <- min(ngp$date_time)
 end_date <- max(ngp$date_time)
+# We can do algebra with dates
 track_duration <- end_date - start_date
 track_duration
 
@@ -164,6 +208,7 @@ track_duration
 class(track_duration)
 
 # We could also do the following, if we want to control the units
+# of the output
 track_duration <- difftime(time1 = end_date,
                            time2 = start_date,
                            units = "hours")
@@ -177,21 +222,24 @@ track_duration <- difftime(time1 = end_date,
 track_duration
 ```
 
-Let's look at distance travelled, each step and in total. For this, we use the `geosphere` package.
+Let's look at distance traveled, each step (that is, between each pair of locations) and in total (that is, the sum of all the steps). For this, we use the `geosphere` package.
 
 ```{r}
+# Create a new column called 'distance'.
 ngp$distance <- distGeo(p1 = ngp[,c("decimal_longitude", "decimal_latitude")])
 
-# Divide by 1000 to get distance in km
+# Distance is in meters, divide by 1000 to get distance in km
 ngp$distance <- ngp$distance/1000
 
-# Total distance travelled in km
+# Total distance travelled in km, by summing all the steps
 sum(ngp$distance, na.rm = T) # We need na.rm = TRUE to remove NAs - the last value is NA
 ```
 
-Now let's look at the time steps, whereafter we can calculate speed (because we have just calculated distance).
+Now let's look at the time steps, whereafter we can calculate speed (because we have just calculated distance, and speed is simply distance divide by time).
 
 ```{r}
+# First we calculate the time differenc between each pair of locations
+# (that is, the step duration)
 timediff <- diff(ngp$date_time)
 units(timediff) <- "hours"
 timediff <- as.numeric(timediff)
@@ -200,12 +248,13 @@ ngp$timestep <- timediff
 
 # We needed to do a few things here
 # 1) Change the output from the 'diff' function into hours (it was in seconds)
-# 2) Coerce the result into a nummeric
-# 3) to add an NA at the end, since diff is not as clever as distGeo
+# 2) Coerce the result into a nummeric (it was a 'difftime' class)
+# 3) to add an NA at the end, since the diff funciton is not as clever as
+# distGeo, and doesn't automatically add it.
 
 ```
 
-Let's plot the frequency distributions of step lengths and step durations.
+Let's plot the frequency distributions (histograms) of step lengths and step durations. You will see in the histogram for step duration, there is a big outlier that we would normally deal with by filtering or some kind of inspection.
 
 ```{r}
 ggplot(data = ngp,
@@ -223,7 +272,7 @@ ggplot(data = ngp,
        y = "Frequency")
 ```
 
-Since we calculated step length and duration, we can work out speed in km/h, and map that. Note that in the call to ggplot, we replace the aesthetic (`aes`), `scientific_name` with `speed`.
+Since we calculated step length and duration, we can work out speed in km/h, and map that. Note that in the call to ggplot, we replace the aesthetic (`aes`), `scientific_name` with `speed`, so we can colour each point by speed.
 
 ```{r}
 ngp$speed <- ngp$distance / ngp$timestep
@@ -239,11 +288,11 @@ ggplot(data = world) +
                      max(ngp$decimal_latitude, na.rm = T)))
 ```
 
-Related to the step length (distance), but related, is calculating the displacement. This is, at each location, the distance of that point from the track's origin. Again, we use the `distGeo` function, but this time we calculate the distance to a pair of 'home' coordinates (the start of the track).
+Related to the step length (distance), is calculating the displacement. This is, at each location along the track, the distance of that point from the track's origin. Again, we use the `distGeo` function, but this time we calculate the distance to a pair of 'home' coordinates (the start of the track), since we can think of displacement as the distance from 'home' at each point.
 
 ```{r}
 # First we define 'home' as the coordinates at the start of the track
-home <- ngp[1, c("decimal_longitude", "decimal_latitude")] # Select row 1
+home <- ngp[1, c("decimal_longitude", "decimal_latitude")] # Select row 1 of the data
 
 # Now we use the distGeo function again
 ngp$displacement <- distGeo(p1 = ngp[,c("decimal_longitude", "decimal_latitude")],
@@ -262,17 +311,17 @@ ggplot(data = ngp,
        y = "Displacement (km)")
 ```
 
-In the plot we can also see that lots of the first locations are likely to be while the bird was still sitting on its nest, after the tag was deployed on it. In a thorough analysis we would trim the track, manually or programatically. Techniques called 'net squared displacement' and 'mean squared displacement' are sometime used to determine the kind of migratory behavior that animals are displaying, from these plots. See [Singh et al. (2016)](https://doi.org/10.1371/journal.pone.0149594) for more details.
+In the plot we can see that the line is initally flat (near-zero displacement), so lots of the first locations are likely to be while the bird was still sitting on its nest, after the tag was deployed on it. In a thorough analysis we would trim the track, manually or programatically, to remove these locations on the nest (or on the beach or shore for seals). Techniques called 'net squared displacement' and 'mean squared displacement' are sometime used to determine the kind of migratory behavior that animals are displaying, from these plots of displacment. See [Singh et al. (2016)](https://doi.org/10.1371/journal.pone.0149594) for more details.
 
 # Calculating utilization distributions
 
-We'll use the `adehabitathr` package (<https://cran.r-project.org/web/packages/adehabitatHR/index.html>) to calculate utilisation distribuitons for our single track. There are three 'sibling' adehabitat packages for different analyses ([Calenge 2006](https://doi.org/10.1016/j.ecolmodel.2006.03.017)). Unfortunately, they all still rely on the `sp` package, which you will recall is the older version of `sf`. Nonetheless, they remain a useful and comprehensive set of tools.
+We'll use the `adehabitathr` package (<https://cran.r-project.org/web/packages/adehabitatHR/index.html>) to calculate utilisation distributions for our single track. Remember the methods I introdued to you in Lecture 07 (Figure 7.9 in Pittman Chapter 7). There are three 'sibling' adehabitat packages for different analyses ([Calenge 2006](https://doi.org/10.1016/j.ecolmodel.2006.03.017)). Unfortunately, they all still rely on the `sp` package, which you will recall is the older version of `sf`. Nonetheless, they remain a useful and comprehensive set of tools.
 
 ## Minimum Convex Polygons
 
 Minimum convex polygons (MCPs) are one of the simplest estimators of spatial utilisation. MCPs are 'the smallest polygon around points with all interior angles less than 180 degrees. MCPs are common estimators of home range, but can potentially include area not used by the animal and overestimate the home range' (from <https://jamesepaterson.github.io/jamespatersonblog/03_trackingworkshop_homeranges>).
 
-Calculating utilsiation distributions with adehabitat takes a litle bit of preparation. Let's calculate MCPs...
+Calculating utilsiation distributions with adehabitat takes a little bit of preparation. Let's calculate MCPs...
 
 ```{r}
 # First, we need to create an object of class 'spatial points' (a vector format) to use in the mcp function.
@@ -283,32 +332,35 @@ library(sp)
 # Make a copy of our tracks
 ngp_sp <- ngp
 
-# The mcp function only allows one extra column, the animal id, so
+# The mcp function only allows one extra column, the animal id, so we
+# select only three columns
 ngp_sp <- dplyr::select(ngp_sp,
                         decimal_longitude,
                         decimal_latitude,
                         individual_id)
 
-# Tell R the object has spatial coordinates
+# Tell R the dataframe we just made has spatial coordinates
 coordinates(ngp_sp) <- c("decimal_longitude", "decimal_latitude")
 
-# And what the coordinate reference system is
+# And tell R what the coordinate reference system of the dataframe is
 proj4string(ngp_sp) <- CRS("EPSG:4326")
 
-# Now we see the object has a new class: spatial points data frame
+# Now we see that the object has a new class: spatial points data frame
 class(ngp_sp)
 
-# We can use this object as input for the MCP function
+# We can use this object as input for the MCP function in adehabitatHR
 ngp_mcp <- mcp(ngp_sp, percent = 100)
 
 # And we can plot the result, with the locations on top
 plot(ngp_mcp)
 plot(ngp_sp, add = TRUE, pch = 16)
 
-# If we want to plot the mcp with ggplot, we need to convert it to sf
+# If we want to plot the mcp with ggplot, we need to convert
+# it to an sf object
 ngp_mcp_sf <- st_as_sf(ngp_mcp)
 
-# And we plot it by adding a geom_sf layer to our plot
+# And we plot it by adding a `geom_sf` layer to the
+# kind of plot we made earlier
 ggplot(data = world) +
     geom_sf() +
   geom_sf(data = ngp_mcp_sf, fill = "gold") +
@@ -333,7 +385,8 @@ Let's go...
 
 ```{r}
 
-# We can calculate the kde using the same input we used for the mcp
+# We can calculate the kde using the same input we used for
+# calculating the mcp above
 ngp_kde <- kernelUD(ngp_sp, h = "href")
 
 # The output has its own bespoke class, but we can plot it with
@@ -343,16 +396,20 @@ image(ngp_kde)
 ngp_vud <- getvolumeUD(ngp_kde)
 ngp_kde_raster <- rast(as(ngp_vud$NGP06_KD_SEP_2015,"SpatialPixelsDataFrame"))
 
-# Remember that the 95% kde is often designated the home range and the 50% kde the core range. To get a specific contour we do:
+# Remember that the 95% kde is often designated the home range and the 50% kde
+# the core range. To get a specific contour from
+# the KDE we just caculated we do:
 ngp_kde_95 <- getverticeshr(ngp_kde, percent = 95)
 ngp_kde_50 <- getverticeshr(ngp_kde, percent = 50)
 
-# And we can convert these to sf objects for plotting
+# And we can then convert these to sf objects for plotting,
+# using the 'st_as_sf' function
 ngp_kde_95 <- st_as_sf(ngp_kde_95)
 ngp_kde_50 <- st_as_sf(ngp_kde_50)
 
 # Let's plot the kde and its contours in ggplot
-# to plot the terra raster in ggplot we use the tidyterra package
+# To plot the terra raster in ggplot we use the tidyterra package
+# and its 'geom_spatraster'
 # see https://www.r-bloggers.com/2022/05/introducing-tidyterra/ for more
 ggplot(data = world) +
     geom_sf() +
@@ -372,11 +429,11 @@ ggplot(data = world) +
                      max(ngp$decimal_latitude, na.rm = T)+5))
 ```
 
-Remember that the **low kde value represents high density**. Notice how the kde overestimates the area (the mcp too), and how it ignores hard barriers like land (South Africa in the north-east of the plot). As I mentioned in lecture, and as stated in Pittman chapter 7, LoCoH ([Getz et al. 2007](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0000207)) is an alternative to mcp, and movement-based kernel density estimation, or biased random bridge, ([Benhamou & Cornelis 2010](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1937-2817.2010.tb01257.x)) is an alternative to kde. We won't use these two methods in this tutorial, but you can calculate them in adehabitat. See `?LoCoH()` and `?BRB()` in adehabitatHR.
+Remember that the **low kde value represents high density**. Notice how the kde overestimates the area (the mcp too), and how it ignores hard barriers like land (South Africa in the north-east of the plot). As I mentioned in lecture 7, and as stated in Pittman chapter 7, LoCoH ([Getz et al. 2007](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0000207)) is an alternative to mcp, and movement-based kernel density estimation, or biased random bridge, ([Benhamou & Cornelis 2010](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1937-2817.2010.tb01257.x)) is an alternative to kde. We won't use these two methods in this tutorial, but you can calculate them in adehabitat. See `?LoCoH()` and `?BRB()` in adehabitatHR, for more information.
 
 # Behavioural classification
 
-There are many ways of estimating behaviour from movement data. Table X in Pittman lists several. We'll look at a method called Expectation Maximisation Binary Clustering (EMbC) (Garriga).
+There are many ways of estimating behaviour from movement data. Figure 7.9 in Pittman lists several. We'll look at a method called Expectation Maximisation Binary Clustering (EMbC) (Garriga).
 
 A quick start guide is at <https://rdrr.io/cran/EMbC/f/vignettes/EMbC_qckref.Rmd>
 
@@ -395,7 +452,7 @@ mybcp <- stbc(ngp_embc_data, info=-1)
 sctr(mybcp)
 ```
 
-This plot shows us the each tracking location according to the turning angle (vertical axis) and velocity (horizontal axis) of the preceding step. The algorithm then performs bivariate (two variable - speed and angle) clustering, and clusters the locations into four categories according to low and high speed and turning angle.
+This plot shows us the each tracking location according to the turning angle (vertical axis) and velocity (horizontal axis) of the preceding step. The algorithm then performs bivariate (two variable - speed and angle) clustering, and clusters the locations into four categories according to low and high speed and turning angle. LL = low speed, low turning angle. LH = low speed, high turning angle. HL = high speed, low turning angle, HH = high speed and high turning angle. NC = not classified.
 
 We can look at the labelled (annotated) trajectory over time.
 
@@ -403,17 +460,17 @@ We can look at the labelled (annotated) trajectory over time.
 lblp(mybcp)
 ```
 
-Or map the labelled trajectory:
+Or map the labelled trajectory. Think about how these classifications relate to the animal's behaviour (for example, the Area Restricted Search Behaviour we talked about in lectures 6 and 7).
 
 ```{r}
 view(mybcp)
 ```
 
-We can get these outputs from the EMbC object, and add them to our data.
+We can get these specific outputs from the EMbC object, and add them to our data frame.
 
 ```{r}
 
-# We can look at the cutoff values with
+# We can look at the cutoff values for each classification with
 mybcp@R
 
 # We can write the outputs to the data frame
@@ -423,7 +480,7 @@ ngp_embc_data$embc_label <- mybcp@A # These are the EMbC labels
 
 # Let's map the labels
 # Notice that I put as.factor() around the embc_label
-# That's because embc returns the label as a numeric, but we want to treat it as a categorical factor.
+# That's because embc returns the label as a numeric, but we want to treat it as a categorical factor. Also notice that EMbC has included the 5th classifcation, which is 'NC' (no classification).
 ggplot(data = world) +
     geom_sf() +
   geom_point(data = ngp_embc_data, aes(x = decimal_longitude,
@@ -435,7 +492,7 @@ ggplot(data = world) +
                      max(ngp_embc_data$decimal_latitude, na.rm = T)))
 ```
 
-Notice that there are five classes. The fifth class corresponds with locations that were not classified (NC in the first EMbC plot). Most location are in class 3 and 4. Class 4 seems to be associated with slower, more tortuous movements than class 3.
+Notice that there are five classes. The fifth class corresponds with locations that were not classified (NC in the first EMbC plot). Most location are in class 3 and 4. Class 4 seems to be associated with slower, more tortuous (low speed, high turning angles, or LH) movements than class 3, which looks like low turning angle and higher speed.
 
 # Environmental relationships
 
@@ -444,7 +501,9 @@ We can examine the relationship between animals' space use or movement behavior,
 Let's get the bathymetry data using `marmap`.
 
 ```{r}
-# First, we define the spatial extent, similar to what we did for the first plot
+# First, we define the spatial extent, similar to what we did for the
+# first plot. We use the min and max functions, on longitue (x)
+# and latitude (y)
 min_x <- min(ngp_embc_data$decimal_longitude, na.rm = T) - 1
 max_x <- max(ngp_embc_data$decimal_longitude, na.rm = T) + 1
 min_y <- min(ngp_embc_data$decimal_latitude, na.rm = T) - 1
@@ -452,7 +511,15 @@ max_y <- max(ngp_embc_data$decimal_latitude, na.rm = T) + 1
 
 bathy <- getNOAA.bathy(lon1=min_x,lon2=max_x, lat1=min_y,lat2=max_y,resolution=4)
 
-# Convert it to a raster, than a terra raster
+# If you can't get this function to work (sometimes NOAA's servers get
+# overwhelmed), you can
+# 'uncomment' (by removing the preceding # sign) and run the following line
+# after downloading the file
+# from Blackboard and saving it in a folder called 'data'.
+
+# bathy <- readRDS
+
+# Convert it to a raster-raster, then to a terra raster
 bathy <- marmap::as.raster(bathy)
 bathy <- terra::rast(bathy)
 
@@ -470,7 +537,7 @@ ggplot(data = world) +
             ylim = c(min_y, max_y))
 ```
 
-We can now use a handy feature to 'extract' the values from the bathymetry raster at each tracking location.
+We can now use a handy feature to 'extract' the values from the bathymetry raster at each tracking location. That is, at each tracking location we use the 'extract' function to look up the depth value there.
 
 ```{r}
 ngp_embc_data$depth <- terra::extract(bathy, ngp_embc_data[,c("decimal_longitude", "decimal_latitude")])$layer
@@ -482,15 +549,22 @@ head(ngp_embc_data)
 We can then look at the depth values corresponding with each label class.
 
 ```{r}
+# Using a boxplot
 ggplot(data = ngp_embc_data, aes(x = as.factor(embc_label),
                                  y = depth,
                                  fill = as.factor(embc_label))) +
   geom_boxplot()
+
+# Or a violin plot
+ggplot(data = ngp_embc_data, aes(x = as.factor(embc_label),
+                                 y = depth,
+                                 fill = as.factor(embc_label))) +
+  geom_violin()
 ```
 
-So, we see that class 5 indeed corresponds with NC (not classified) and classes 1 and 2 seem to be mainly on or near land locations (but not only). Remember: for this analysis we did not trim out the initial locations when the bird was probably still on its nest.
+So, we see that class 5 indeed corresponds with NC (not classified, there are no values) and classes 1 and 2 seem to be mainly on or near land locations (but not only)\--notice the large number of values near 0 for depth. Remember: for this analysis we did not trim out the initial locations when the bird was probably still on its nest, which might explain all those near-zero values for depth.
 
-We see that the boxes for class 3 and 4 overlap a great deal, but there is some difference. Class 4 is associated with shallower water. Let's focus on those two classes and see if there is a significance difference according to a t-test. Note, in a thorough analysis you would probably not use a t-test, because these data violate the assumption of independence -- they are auto-correlated because they are measured one after the other in a temporal sequence. They are also unlike to be normally distributed. But that's a discussion for another time!
+We see that the boxes for class 3 and 4 overlap a great deal, but there is some difference. Class 4 is associated with shallower water. Let's focus on those two classes and see if there is a significance difference in the depth values according to a t-test. Note, in a thorough analysis you would probably not use a t-test, because these data violate the assumption of independence --- they are auto-correlated because they are measured one after the other in a temporal sequence. They are also unlikely to be normally distributed. But that's a discussion for another time!
 
 ```{r}
 class_3 <- dplyr::filter(ngp_embc_data, embc_label == 3)
@@ -500,7 +574,7 @@ t.test(class_3$depth, class_4$depth)
 
 There is a significant difference, but as I say, we are violating some assumptions...
 
-Looks look at the case where we have a continuous-value response variable, like velocity. We can plot the relationship and fit a linear model.
+Looks look at the case where we have a continuous-value response variable, like the velocity (speed), which we calculated earlier. We can plot the relationship and fit a linear model.
 
 ```{r}
 ggplot(data = ngp_embc_data, aes(x = depth,
@@ -515,7 +589,7 @@ cor(ngp_embc_data$embc_velocity, ngp_embc_data$depth)
 lm(ngp_embc_data$embc_velocity ~ ngp_embc_data$depth)
 ```
 
-We fitted a linear regression, and find a strong correlation, although these kinds of relationships are very unlikely to be linear, so we more often fitting a smooth of some kind, for example using a generalized additive model (GAM).
+We fitted a linear regression, and find a strong correlation. We find that the bird travels faster over deeper water. However, these kinds of relationships are very unlikely to be linear, so we more often fit a 'smooth' of some kind, for example using a generalized additive model (GAM).
 
 ```{r}
 ggplot(data = ngp_embc_data, aes(x = depth,
@@ -524,4 +598,12 @@ ggplot(data = ngp_embc_data, aes(x = depth,
   geom_smooth(method = "gam")
 ```
 
-So, you've conducted your first movement analyses! There's a massive variety of other things you could analyse, and ways to do that, but this is a basic tutorial to get you started. Come and chat to me if you're interested in anything specific.
+So, you've conducted your first movement analyses! There's a massive variety of other things you could analyse, and ways to do that, but this is a basic tutorial to get you started.
+
+# Sources of movement data
+
+To find more movement data which you can use directly in R, explore the `move` package, which can be used to work with data from the [www.movebank.org](https://www.movebank.org/cms/movebank-main) site:
+
+<https://cran.r-project.org/web/packages/move/vignettes/move.html>
+
+<https://cran.r-project.org/web/packages/move/vignettes/browseMovebank.html>
