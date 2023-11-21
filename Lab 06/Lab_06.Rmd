@@ -8,7 +8,7 @@ output:
   pdf_document:
     df_print: paged
   word_document: default
-subtitle: "Lab 06a - R Markdown"
+subtitle: "Lab 06 - R Markdown"
 highlight: tango
 urlcolor: blue
 linkcolor: blue
