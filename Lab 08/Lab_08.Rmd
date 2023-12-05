@@ -20,19 +20,19 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-In this tutorial we'll look at a few fairly simple ways of analysing change in seascape data. We will assume a simple case, where we examine change in discrete time. That is, at fixed time points or intervals (time slices). In Chapter 6 of Pittman, Jackson et al. discuss some more complicated ways of modelling change, but we'll keep it simple.
+In this tutorial we'll look at a few fairly simple ways of analysing change in seascape data. We will assume a simple case, where we examine change in discrete time. That is, at fixed time points or intervals (time slices). In Chapter 6 of Pittman, Jackson et al. discuss some more complicated ways of modelling change, but for this lab we'll keep it simple.
 
-Remember that we have two different conceptual models for representing seascape patterns: 1) the continuous gradient model, and 2) the patch-mosaic model.
+Remember, we have two different conceptual models for representing seascape patterns: 1) the continuous gradient model, and 2) the patch-mosaic model.
 
 # Change in continuous gradient models
 
 ## Data
 
-As our example here, we'll use data from the paper "**Spatiotemporal Overlap of Baleen Whales and Krill Fisheries in the Western Antarctic Peninsula Region**" (Reisinger et al. 2022; <https://doi.org/10.3389/fmars.2022.914726>). In the paper, we looked at the spatiotemporal overlap between baleen whales (minke and humpback whales) and the krill fishery in the Western Antarctic Peninsula. The krill fishery has become more spatially concentrated over the last few years, raising concerns about the impact of local krill depletion on predators (whales, seals, seabirds).
+As our example here, we'll use data from the paper "**Spatiotemporal Overlap of Baleen Whales and Krill Fisheries in the Western Antarctic Peninsula Region**" (Reisinger et al. 2022; <https://doi.org/10.3389/fmars.2022.914726>). In the paper, we looked at the spatiotemporal overlap between baleen whales (minke and humpback whales) and the krill fishery in the Western Antarctic Peninsula. The krill fishery has become more spatially concentrated over the last few years, raising concerns about the impact of local krill depletion on predators (whales, seals, and seabirds).
 
 ## The simplest case: two points in time
 
-In the simplest case, we have only two points in time (or two timeslices). Hence, we are comparing a pair of rasters in some way.
+In the simplest case, we have only two points in time (or two 'timeslices'). Hence, we are comparing a pair of rasters in some way.
 
 Let's read in some data on Antarctic krill fishing catch in the Western Antarctic Peninsula region. We'll read the data in directly from the Github repository associated with the paper mentioned above, Reisinger et al. (2022) from the Github repository here: <https://github.com/ryanreisinger/whaleKrillOverlap>
 
@@ -45,6 +45,13 @@ library(tidyterra)
 library(dplyr)
 library(tidyr)
 library(spatialEco)
+
+# If you need to install the spatialEco libary, uncomment and run the lines below
+# install.packages("remotes")
+# library(remotes)
+# remotes::install_github("jeffreyevans/spatialEco")
+# library(spatialEco)
+
 ```
 
 Then, we can load the files.
@@ -55,8 +62,11 @@ fish_2016 <- rast("https://github.com/ryanreisinger/whaleKrillOverlap/raw/main/d
 # 2020 season
 fish_2020 <- rast("https://github.com/ryanreisinger/whaleKrillOverlap/raw/main/data_out/ccamlr_fishing_rasters_monthly/2020.tif")
 ```
+If you weren't able to read the files directly into R using the `rast` function, you can download the files from the Github repository, using the links below, and read them in from your local computer. You'll need to change the path to the file to match where you saved it.
+https://github.com/ryanreisinger/whaleKrillOverlap/raw/main/data_out/ccamlr_fishing_rasters_monthly/2020.tif
+https://github.com/ryanreisinger/whaleKrillOverlap/raw/main/data_out/ccamlr_fishing_rasters_monthly/2016.tif
 
-We'll take a look at the rasters, noting their characteristics.
+Let's take a look at the rasters, noting their characteristics.
 
 ```{r}
 fish_2016
@@ -69,7 +79,7 @@ We first check the coordinate reference system:
 crs(fish_2016)
 ```
 
-It's WGS 1984, with EPSG code 4326 (<https://www.epsg.io>).
+It's WGS 1984, with EPSG code 4326 (<https://www.epsg.io>). You can see the EPSG code in the last slot of the above output, called 'ID'.
 
 Notice that the spatial extent (longitude, latitude) is:
 
@@ -83,7 +93,7 @@ And the resolution (degrees) is:
 res(fish_2016)
 ```
 
-If you're keen-eyed you may have notice that the dimensions of the raster are:
+If you're keen-eyed you may have noticed that the dimensions of the raster are:
 
 ```{r}
 dim(fish_2016)
@@ -97,9 +107,9 @@ We can see that when we plot it.
 plot(fish_2016)
 ```
 
-In this case, each layer represents a month in the annual fishing season that runs from December (layer 1) to July the next year (layer 8). The values are the catch of Antarctic krill, in kg, in each pixel. Mostly you'll see zero catch; the catches are concentrated in small hotspots off the northern part of the Antarctic Peninsula.
+In this case, each layer represents a month in the annual fishing season that runs from December (layer 1) to July the next year (layer 8). The values are the catch of Antarctic krill, in kg, in each pixel. Mostly you'll see zero catch; the catches are concentrated in small hotspots off the northern part of the Antarctic Peninsula. There is no catch at all in the first layer and the last two layers.
 
-The rasters have a much larger extent than our area of interest, so we'll start out by creating our own extent, which we use to crop the rasters.
+The rasters have a much larger extent than our area of interest, so we'll start out by creating our own extent, which we will then use to crop the rasters.
 
 ```{r}
 # Create an extent by defining the four corners
@@ -107,16 +117,20 @@ min_x <- -65
 max_x <- -55
 min_y <- -66
 max_y <- -61
+
+# Combine the four corners into a vector
 our_extent <- c(min_x, max_x, min_y, max_y)
 
+# Crop the rasters to our extent 
 fish_2016 <- crop(fish_2016, our_extent)
 fish_2020 <- crop(fish_2020, our_extent)
 
+# Plot the cropped rasters
 plot(fish_2016)
 plot(fish_2020)
 ```
 
-For our first example -- two time points - let's first calculate the total catch in each pixel for the 2016 and 2020 seasons. We do that simply by adding together (pixel-wise) the values for each month (layer). In this case we use the
+For our first example -- two time points - let's first calculate the total catch in each pixel for the 2016 and 2020 seasons. We do that simply by adding together (pixel-wise) the values for each month (layer). In this case we use the `sum` function, which adds together all the values in each pixel.
 
 ```{r}
 catch_2016 <- sum(fish_2016)
@@ -128,11 +142,11 @@ nlyr(catch_2020) # only one layer now
 plot(catch_2020)
 ```
 
-The distribution of values is highly skilled and hard to see, so let's take the log10 of the values. We first add 1 to each pixel because the log10 of zero is not defined.
+So, these layers are now the total fishing effort over all the months in 2016 and 2020. The distribution of values is highly skilled and hard to see, so let's take the log10 of the values. We first add 1 to each pixel because the log10 of zero is not defined.
 
 ```{r}
-log_catch_2016 <- log10(catch_2016 + 1)
-log_catch_2020 <- log10(catch_2020 + 1)
+log_catch_2016 <- log10(catch_2016 + 1) # add 1 to each pixel and calculate the log10
+log_catch_2020 <- log10(catch_2020 + 1) # add 1 to each pixel and calculate the log10
 ```
 
 We can look at the distribution (histogram) of fishing catch values in each raster, first using a rudimentary approach, and then with a better approach in ggplot2.
@@ -144,24 +158,24 @@ terra::density(log_catch_2016)
 terra::density(log_catch_2020)
 ```
 
-Let's try in `ggplot2`.
+Let's try and get a better plot in `ggplot2`.
 
 ```{r}
-# First, we get the values from each raster
+# First, we get the values from each raster, using the values() function
 values_2016 <- values(log_catch_2016)
 values_2020 <- values(log_catch_2020)
 
-# Now these are just vectors of values.
-# We want to combine these into a dataframe.
+# Now these are just vectors of values (they are no longer spatial)
+# We want to combine these vectors into into a dataframe for display in ggplot2
 # First we create a dataframe for each year, filling it with the values
 values_2016_df <- data.frame("catch" = as.numeric(values_2016),
                              "year" = "2016")
 values_2020_df <- data.frame("catch" = as.numeric(values_2020),
                              "year" = "2020")
-# Then, bind them by row - 'rbind'
+# Then, bind the two dataframes by row - 'rbind'
 values_df <- rbind(values_2016_df, values_2020_df)
 
-# And then we plot
+# And then we plot the dataframe containing both years' values
 ggplot(data = values_df, aes(x = catch, colour = year, fill = year, group = year)) +
   geom_histogram() +
   facet_wrap(~year, ncol = 1) # this layer produces the 'facets'
@@ -174,14 +188,23 @@ ggplot(data = values_df, aes(y = catch, colour = year, group = year)) +
   geom_boxplot()
 ```
 
-We can compare the two rasters pixel-wise, simply by taking the difference between them (subtracting one from the other).
+Let's remove all the pixels with zero catch, and then try the histogram again. Remember, we had already log10 transformed the data after adding 1 to each pixel, so our zero values are now 1, because `log10(0 + 1) = 0`. So, let's filter out all zero values, and plot the boxplot again.
+
+```{r}
+values_df <- dplyr::filter(values_df, catch > 0)
+
+ggplot(data = values_df, aes(y = catch, colour = year, group = year)) +
+  geom_boxplot()
+```
+
+We can compare the two rasters pixel-wise, simply by taking the difference between them (subtracting one raster from the other).
 
 ```{r}
 catch_change <- log_catch_2020 - log_catch_2016
 plot(catch_change)
 ```
 
-We can improve the colour scale, but it takes a bit of work. It's simpler to plot this in `ggplot2`, with the help of the `tidyterra` package.
+We can improve the colour scale, but it takes a bit of work. It's simpler to plot this in `ggplot2`, with the help of the `tidyterra` package. The `geom_spatraster()` geometery is what we use to plot a terra raster in ggplot2. We'll also use a spatial colour ramp -- `scale_fill_gradient2()` -- to get a colour scale with blue for low and red for high values.
 
 ```{r}
 ggplot() +
@@ -193,7 +216,7 @@ ggplot() +
     na.value = "grey",
     name = "Change in catch (log10(kg + 1))"
   ) +
-  labs(main = "Change in kril catch",
+  labs(main = "Change in krill catch",
        sub = "2016 to 2020",
        x = "Longitude",
        y = "Latitude")
@@ -201,7 +224,7 @@ ggplot() +
 
 ## Several points in time
 
-Let's know extend this to more than two points in time. We can use one of the rasters we read in, treating each layer (month) as a point in time. Recall that those rasters have 8 layers, corresponding with 8 months or 8 time points.
+Let's now extend this analysis to more than two points in time. We can use one of the rasters we read in, treating each layer (month) as a point in time. Recall that those rasters each have 8 layers, corresponding with 8 months or 8 time points.
 
 ```{r}
 nlyr(fish_2020)
@@ -214,19 +237,24 @@ fish_2016 <- log10(fish_2016 + 1)
 fish_2020 <- log10(fish_2020 + 1)
 ```
 
-First, let's compare the values in each time period, like we did above, but for the 8 months. You'll notice that in this chunk we convert a dataframe from a 'wide' to a 'long' format. The 'long' format is preferred by ggplot and the tidyverse packages, and many people find it easier to work with. G&G call this format 'tidy data': <https://r4ds.had.co.nz/tidy-data.html>. They discuss 'pivoting' - changing from wide to long - here: <https://r4ds.had.co.nz/tidy-data.html#pivoting>. We'll use the `pivot_longer()` function from the `tidyr` package (<https://tidyr.tidyverse.org/reference/pivot_longer.html>).
+First, let's compare the values in each time period, like we did above, but for the 8 months. You'll notice that in this chunk we convert a dataframe from a 'wide' to a 'long' format. The 'long' format is preferred by ggplot and the tidyverse packages, and many people find it easier to work with. Wickham et al. call this format 'tidy data': <https://r4ds.had.co.nz/tidy-data.html>. They discuss 'pivoting' - changing from wide to long - here: <https://r4ds.had.co.nz/tidy-data.html#pivoting>. We'll use the `pivot_longer()` function from the `tidyr` package (<https://tidyr.tidyverse.org/reference/pivot_longer.html>).
 
 ```{r}
 # Get the values from the raster
 fish_month_values <- values(fish_2020)
 
+# Notice, that this is a matrix rather than a vector,
+# because we have 8 layers in the raster
+class(fish_month_values)
+
 # Covert the matrix into a dataframe
 fish_month_values <- as.data.frame(fish_month_values)
 
-# Change from 'wide' to 'long' format for plotting in ggplot
+# Change from 'wide' (lots of columns) to 'long' (only a few columns) format for plotting in ggplot
 # Take some time to read the pivot_longer help,
 # to understand what's happening here
 # Note the use of the function everything() to select all columns
+# names_to and values_to are arguments that tell the function what to call the new columns
 fish_month_values <- pivot_longer(fish_month_values,
                                   cols = everything(),
                                   names_to = "month", values_to = "catch")
@@ -242,7 +270,8 @@ ggplot(data = fish_month_values, aes(y = catch, x = month, colour = month, fill 
   geom_boxplot()
 ```
 
-Despite the distribution still being skewed even after taking the log (the 'boxes' in the boxplots are all pretty much the same), we can see lots of outliers in months 4, 5 and 6 of the season (so, March, April and May), with a peak in high catches in May ('2020_5').
+Despite the distribution still being skewed even after taking the log (the 'boxes' in the boxplots are all pretty much the same), we can see lots of outliers in months 4, 5 and 6 of the season (so, March, April and May), with a peak in high catches in May ('2020_5'). If we wanted to, we could use the technique as above to filter out the zero values from the dataframe.
+
 
 Let's assume we want to fit some kind of trendline. The first thing we need to do is give our dataframe integer values for the months (currently they are character values). We'll use the `mutate()` and `case_when()` functions. I always find this explainer helpful when using the `case_when` function:
 
@@ -263,7 +292,7 @@ fish_month_values <-
                                   month == "2020_8" ~ 8))
 ```
 
-And now plot it as a scatter plot.
+And now plot it as a scatter plot, fitting a gam (generalised additive model) trendline.
 
 ```{r}
 ggplot(data = fish_month_values, aes(x = month_number, y = catch)) +
@@ -271,7 +300,15 @@ ggplot(data = fish_month_values, aes(x = month_number, y = catch)) +
   geom_smooth(method = "gam", method.args = list("k" = 5))
 ```
 
-Unfortunately, in this case the compuation of the gam smooth fails, probably due to the high number of zeros in many months.
+Unfortunately, in this case the computation of the gam smooth fails, probably because there are only three months with data. We can try a linear model instead, setting `method = "lm"`. Let's also filter out the zero values.
+
+```{r}
+fish_month_values_no_zeros <- filter(fish_month_values, catch > 0) # Filter out the zeros in catch
+
+ggplot(data = fish_month_values_no_zeros, aes(x = month_number, y = catch)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
 
 In the 'try for yourself' section, you can have a go at following these steps with a different dataset...
 
@@ -282,25 +319,32 @@ fish_2020_variance <- app(fish_2020, fun = "var") # Note use of the 'app' functi
 plot(fish_2020_variance)
 ```
 
-And we could look at the trend in each pixel, using a spatial version of Kendall's Tau. The function we'll use is from the `spatialEco` package: <https://www.rdocumentation.org/packages/spatialEco/versions/1.3-7/topics/raster.kendall>
+And we could look at the trend in each pixel, using a spatial version of Kendall's Tau. The function we could use is from the `spatialEco` package: <https://www.rdocumentation.org/packages/spatialEco/versions/1.3-7/topics/raster.kendall>
+
+However, this function requires six observations, and it fails if there are NA cells in the raster (like our raster, where land has NA values). Notice how it fails. We can use the `regress()` function in `terra`, which runs a linear regression (linear model) for each pixel in ther raster. We can then plot the slope and intercept of the regression line.
+
 
 ```{r}
-fish_trend <- raster.kendall(fish_2020)
+# fish_trend <- kendall(fish_2020) # This would fail because there are all NA values in the raster where we have land
+fish_trend <- regress(fish_2020, 1:nlyr(fish_2020)) # This works.
 plot(fish_trend)
-```
 
-In this example, there is no trend because we have so many zero values!
+# X is the slope of the regression line, and intercept is the intercept of the regression
+```
 
 # Try for yourself
 
-The last two steps were not very successful, because of the kind of data we were using. It was very sparse: many cells had no vales. As an exercise, starting in class, and carrying on at home, I'd like you to try and implement the workflow above with a different dataset. This is building towards what you will need to do for your workflow assessment.
+The last two steps were only moderately successful, because of the kind of data we were using. It was very sparse: many cells had no vales. As an exercise, starting in class, and carrying on at home, I'd like you to try and implement the workflow above with a different dataset. This is building towards the kind of analysis you will need to do for your workflow assessment.
 
 I've uploaded a set of sea surface temperature files for the eastern North Pacific. I add the daily sea surface temperature on 15 September for each year from 2010-2020 (11 files). Think Marine Heatwaves... ([Oliver et al. 2021](https://doi.org/10.1146/annurev-marine-032720-095144)).
 
-Here is the first example of how you can access the files:
+Here is the first example of how you could access the files, directly, or you can download them from the GitHub repository and read them in from your own computer. Remember to change the path to the file to wherever you have saved it. The folder containing the files is:
+https://github.com/ryanreisinger/SOES3056/raw/main/Lab_08/Resources/annual_sst/
 
 ```{r}
-sst_2010 <- rast("https://github.com/ryanreisinger/SOES3056/raw/main/Lab_08/Resources/annual_sst/sst_2010.tif")
+sst_2010 <- rast("https://github.com/ryanreisinger/SOES3056/raw/main/Lab%2008/Resources/annual_sst/sst_2010.tif")
 
 plot(sst_2010)
+
+
 ```
