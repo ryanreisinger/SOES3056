@@ -4,9 +4,9 @@ author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
   word_document: default
-  html_document:
-    df_print: paged
   pdf_document:
+    df_print: paged
+  html_document:
     df_print: paged
 subtitle: "Lab 02 - Scripts, project management, and workflows"
 highlight: tango
