@@ -3,10 +3,10 @@ title: "Seascape Ecology"
 author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
-  html_document:
+  pdf_document:
     df_print: paged
   word_document: default
-  pdf_document:
+  html_document:
     df_print: paged
 subtitle: "Lab 04 - Raster Analysis"
 highlight: tango
@@ -34,21 +34,35 @@ You'll often want to use bathymetry data in your work, be it simple for maps, or
 
 There are a few commonly-used sources for global bathymetry data, including ETOPO (<https://www.ngdc.noaa.gov/mgg/global/global.html>) and GEBCO (<https://www.gebco.net/>). You can manually download these data from the websites, but today we'll try and use the `marmap` package (https://cran.r-project.org/package=marmap) to download data from inside RStudio.
 
-If you can't get `marmap` to work, I have uploaded the files to Blackboard.
+If you can't get `marmap` to work (sometimes it doesn't install, or refuses to download files), I have uploaded the files to Blackboard.
 
-First, we need to install `marmap`.
+First, we need to install `marmap`, and other packages we will use.
 
-```{r}
+```{r eval=FALSE, include=TRUE}
 # Install marmap library
-# By setting 'dependencies = TRUE', I am asking R to also install all the packages marmap needs
+# Note, by setting 'dependencies = TRUE', I am asking R to also install all the packages marmap needs
 # to work
 install.packages("marmap",
                  repos = "https://cran.rstudio.com/",
                  dependencies = TRUE)
 
+# If necessary, install grec
+install.packages("grec",
+                 repos = "https://cran.rstudio.com/",
+                 dependencies = TRUE)
+
+# Install the viridis package for some more colour palettes
+install.packages("viridis",
+                 repos = "https://cran.rstudio.com/",
+                 dependencies = TRUE)
+```
+
+
+Now, we can load the packages.
+
+```{r}
 # Load (attach) the library
 library(marmap)
-
 ```
 
 If that worked, we can now download some bathymetry data.
@@ -63,14 +77,18 @@ Let's reproduce the example in the `marmap` vignette ['Analysing bathymetric dat
 
 ```{r}
 # We pass two longitude values and two latidue values to the function to define the extent of the area we want. The resolution argument specifies the resolution of the grid in minutes. We are working with an unprojected coordinate system, in longitude and latitude measured in degrees: each degree is divided into 60 minutes.
-papoue<-getNOAA.bathy(lon1=140,lon2=155, lat1=-13,lat2=0,resolution=4)
+papoue <- getNOAA.bathy(lon1=140, lon2=155, lat1=-13, lat2=0, resolution=4)
 
 # IF THE FUNCTION DOES NOT WORK:
 # If you can't get this function to work (sometimes NOAA's servers get overwhelmed), you can
 # 'uncomment' (by removing the preceding # sign) and run the following line after downloading the file
-# from Blackboard and saving it in a folder called 'data'.
+# from Blackboard and saving it in a folder inside your working directly, called 'data'.
+# (remember to first create the folder if it does not exist
 
 # papoue <- readRDS("./data/papoue.RDS")
+
+# You could also download the file from Github at:
+# https://github.com/ryanreisinger/SOES3056/blob/main/Lab%2004/data/papoue.RDS
 
 # This object is a special kind of raster in marmap's own format. We can see that by asking R about the class:
 class(papoue)
@@ -187,15 +205,18 @@ To use the classification function in `terra`, we first have to define the value
 # all values >= -15,000 and <= -1 become 1, etc.
 m <- c(-15000, -1, 1,
        0, +15000, 2)
-rclmat <- matrix(m, ncol=3, byrow=TRUE)
+reclass_matrix <- matrix(m, ncol=3, byrow=TRUE)
 
 # We used huge values for the minum (-15,000) and maximum (+15,000), but remember that we can look up those values with the minmax() function.
 
 # Have a look at what the matrix looks like
-rclmat
+reclass_matrix
 
 # Now we can classify our raster
-papoue_classified <- classify(papoue_terra, rclmat, include.lowest=TRUE, others = NA) # the argument 'others = NA' means that values which don't fall into one of the categories in our classifaction matrix, get no value (NA).
+papoue_classified <- classify(papoue_terra,
+                              reclass_matrix,
+                              include.lowest=TRUE,
+                              others = NA) # the argument 'others = NA' means that values which don't fall into one of the categories in our classifaction matrix, get no value (NA).
 
 # And let's see what happens when we plot it
 plot(papoue_classified)
@@ -206,13 +227,16 @@ plot(papoue_classified)
 m <- c(-15000, -200, 1,
        -200, 0, 2,
        0, 15000, 3)
-rclmat <- matrix(m, ncol=3, byrow=TRUE)
-papoue_classified <- classify(papoue_terra, rclmat, include.lowest=TRUE, others = NA)
+reclass_matrix <- matrix(m, ncol=3, byrow=TRUE)
+papoue_classified <- classify(papoue_terra,
+                              reclass_matrix,
+                              include.lowest=TRUE,
+                              others = NA)
 plot(papoue_classified)
 
 # I chose 200 m (-200) to approximately represent the continental shelf edge.
 
-# We can turn the raster into a truly categorical raster with levels (which work similarly to other factors in R)
+# We can turn the raster into a truly categorical raster with factor levels (which work similarly to other factors in R)
 
 cls <- data.frame(id=1:3, cover=c("deep-sea", "shelf", "land"))
 levels(papoue_classified) <- cls
@@ -314,6 +338,8 @@ tmpFiles(remove = TRUE)
 
 We'll discuss getting data (including working with NetCDF) in more detail in a later lab, for the moment, let's read in some SST files that I have downloaded and converted raster for this lab. **On Blackboard: Course content -\> Labs -\> Lab 04-\> data-\> sst_files.**
 
+You could also download them from Github: https://github.com/ryanreisinger/SOES3056/tree/main/Lab%2004/data/sst_files
+
 There are seven files (all with a .tif extension. Save these inside a folder called `sst_files` in your `data` directory.
 
 Once you've done that, verify the files are in the right place using the `list.files()` function. This is a handy function for when you start programmatically accessing lots of files.
@@ -412,6 +438,7 @@ That's starting to look a bit like Figure 3.3 in the Seascape Ecology textbook, 
 We can also apply this kind of fucntion to the whole stack using the `sapp()` function and in this case the function works layer by layer instead of calculating a value in each cell *across* all the layers.
 
 ```{r}
+# Warning: this will take a while to run
 sst_all_gradient <- sapp(sst_all, terrain, v = "slope")
 plot(sst_all_gradient)
 ```
@@ -420,17 +447,12 @@ But let's calculate sea surface temperature fronts (also a kind of gradient) usi
 
 For that we'll need the `grec` package.
 
-```{r}
-# If neccessary, install grec
-install.packages("grec",
-                 repos = "https://cran.rstudio.com/",
-                 dependencies = TRUE)
-
-# The attach the library
+```{r message=FALSE, warning=FALSE}
+# Load the grec library we installed earlier
 library(grec)
 
 # And run the function
-sst_fronts <- detectFronts(sst_01)
+sst_fronts <- getGradients(sst_01)
 
 # And plot
 plot(sst_fronts)
@@ -441,15 +463,13 @@ So, it looks about the same as the raster we calculated with the `terrain` funct
 Let's make the map a bit better.
 
 ```{r}
-# Install the viridis package for some more colour palettes
-install.packages("viridis",
-                 repos = "https://cran.rstudio.com/",
-                 dependencies = TRUE)
+# Load the viridis library for more colour palettes
 library(viridis)
 
 # And plot
 terra::plot(sst_fronts,
      main = "Sea surface temperature fronts", # main title
+     legend = "bottom", # put the legend at the bottom
      plg = list(title = "SST gradient (°C/km)"), # a title for the legend
      col = viridis(125)) # use the viridis colour scale
 
