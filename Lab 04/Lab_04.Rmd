@@ -3,10 +3,10 @@ title: "Seascape Ecology"
 author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
+  html_document:
     df_print: paged
   word_document: default
-  html_document:
+  pdf_document:
     df_print: paged
 subtitle: "Lab 04 - Raster Analysis"
 highlight: tango
@@ -104,10 +104,12 @@ plot(papoue)
 blues <- c("lightsteelblue4","lightsteelblue3", "lightsteelblue2", "lightsteelblue1")
 greys <- c(grey(0.6), grey(0.93), grey(0.99))
 
-plot(papoue, image = TRUE, land = TRUE, lwd = 0.03, bpal = list(c(0, max(papoue), greys), c(min(papoue), 0, blues)))
-
-# Add coastline
-plot(papoue, n = 1, lwd = 0.4, add = TRUE)
+plot(papoue, image = TRUE, land = TRUE,
+     deepest.isobath = min(papoue),
+     shallowest.isobath = max(papoue),
+     step = 500, # Set the interval between contour lines
+     lwd = 0.03,
+     bpal = list(c(0, max(papoue), greys), c(min(papoue), 0, blues)))
 ```
 
 You can work through the marmap vignettes to learn more about making nice bathymetry plots, and doing some simple analyses.
