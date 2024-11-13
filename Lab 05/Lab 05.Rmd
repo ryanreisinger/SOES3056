@@ -3,8 +3,8 @@ title: "Seascape Ecology"
 author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 subtitle: "Lab 05 - Analysing Animal Movement Data"
 highlight: tango
 urlcolor: blue
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This week we'll be trying our hand at some basic analyses of animal tracking data.
 
-There are numerous methods for analysing animal movement data, and many R packages too. Joo et al. (2019) provide a recent overview: <https://besjournals.onlinelibrary.wiley.com/doi/10.1111/1365-2656.13116#:~:text=https%3A//doi.org/10.1111/1365%2D2656.13116>. You''ll see in Table 1 of Joo et al. that for a given task several packages could be used. So, tools I've used in this tutorial are usually only one of the options.
+There are numerous methods for analysing animal movement data, and many R packages too. Joo et al. (2019) provide a recent overview: <https://besjournals.onlinelibrary.wiley.com/doi/10.1111/1365-2656.13116#:~:text=https%3A//doi.org/10.1111/1365%2D2656.13116>. You''ll see in Table 1 of Joo et al. that for a given task several packages could be used. So, tools I've used in this tutorial are usually only one of the options. **I would encourage you to explore others.**
 
 We'll be using GPS tracking data for two species of giant petrel: the northern giant petrel (*Macronectes halli*) and the southern giant petrel (*Macronectes giganteus*). The data come from a [paper where my colleagues and I looked at niche segregation in these sibling species](https://royalsocietypublishing.org/doi/full/10.1098/rsos.200649) - how do the two species (as well as males and females) avoid competing for the same resources?
 
@@ -48,7 +48,7 @@ First, let's read in the tracking data directly from a URL.
 tracks <- read.csv("https://github.com/ryanreisinger/giantPetrels/raw/master/Data/GP_tracks_2019-07-01.csv")
 ```
 
-Let's take a peak at the top of the file.
+Let's take a look at the top of the file.
 
 ```{r}
 # The head() function shows us the first 6 rows of a dataframe.
@@ -84,7 +84,7 @@ For this analysis, we're only interested in a few of the columns from the data f
 `track_id` is the unique id of each track, `date_time` is the date and time, UTC, in POSXIct format (which we just created), and `decimal_longitude` and `decimal_latitude` are the longitude and latitude, respectively, in the WGS 1984 coordinate reference system that GPSs use (remember the lab on coordinate reference systems).
 
 ```{r}
-# Note that I've used dplyr::select() to force R to use the 'select' function from the 'dplyr' package. This is because another package that we use later, adehabitatHR, also has a 'select' function and they 'mask' one another (that is, R tries to use the 'select' function from the wrong package, resulting in an error)
+# Note that I've used dplyr::select() to force R to use the 'select' function from the 'dplyr' package. The syntax is packagename::function. This is because another package that we use later, adehabitatHR, also has a 'select' function and they 'mask' one another (that is, R tries to use the 'select' function from the wrong package, resulting in an error)
 tracks <- dplyr::select(tracks,
                  scientific_name,
                  individual_id,
@@ -143,7 +143,7 @@ ggplot(data = world) +
             ylim = c(min_y, max_y))
 ```
 
-We could use the same approach to colour the tracks by individual. Notice that I switch off the legend in `theme` since there are so many individuals.
+We could use the same approach to colour the tracks by individual. Notice that I switch off the legend in `theme` since there are so many individuals (the legend would take up too much space).
 
 ```{r}
 ggplot(data = world) +
@@ -311,11 +311,11 @@ ggplot(data = ngp,
        y = "Displacement (km)")
 ```
 
-In the plot we can see that the line is initally flat (near-zero displacement), so lots of the first locations are likely to be while the bird was still sitting on its nest, after the tag was deployed on it. In a thorough analysis we would trim the track, manually or programatically, to remove these locations on the nest (or on the beach or shore for seals). Techniques called 'net squared displacement' and 'mean squared displacement' are sometime used to determine the kind of migratory behavior that animals are displaying, from these plots of displacment. See [Singh et al. (2016)](https://doi.org/10.1371/journal.pone.0149594) for more details.
+In the plot we can see that the line is initally flat (near-zero displacement), so lots of the first locations are likely to be while the bird was still sitting on its nest, after the tag was deployed on it. In a thorough analysis we would trim the track, manually or programatically, to remove these locations on the nest (or on the beach or shore for seals). Techniques called 'net squared displacement' and 'mean squared displacement' are sometime used to determine the kind of migratory behavior that animals are displaying, from these plots of displacement. See [Singh et al. (2016)](https://doi.org/10.1371/journal.pone.0149594) for more details.
 
 # Calculating utilization distributions
 
-We'll use the `adehabitatHR` package (<https://cran.r-project.org/web/packages/adehabitatHR/index.html>) to calculate utilisation distributions for our single track. Remember the methods I introdued to you in Lecture 07 (Figure 7.9 in Pittman Chapter 7). There are three 'sibling' adehabitat packages for different analyses ([Calenge 2006](https://doi.org/10.1016/j.ecolmodel.2006.03.017)). Unfortunately, they all still rely on the `sp` package, which you will recall is the older version of `sf`. Nonetheless, they remain a useful and comprehensive set of tools.
+We'll use the `adehabitatHR` package (<https://cran.r-project.org/web/packages/adehabitatHR/index.html>) to calculate utilisation distributions for our single track. Remember the methods I introduced to you in Lecture 07 (Figure 7.9 in Pittman Chapter 7). There are three 'sibling' adehabitat packages for different analyses ([Calenge 2006](https://doi.org/10.1016/j.ecolmodel.2006.03.017)). Unfortunately, they all still rely on the `sp` package, which you will recall is the older version of `sf`. Nonetheless, they remain a useful and comprehensive set of tools.
 
 ## Minimum Convex Polygons
 
@@ -562,7 +562,7 @@ ggplot(data = ngp_embc_data, aes(x = as.factor(embc_label),
   geom_violin()
 ```
 
-So, we see that class 5 indeed corresponds with NC (not classified, there are no values) and classes 1 and 2 seem to be mainly on or near land locations (but not only)\--notice the large number of values near 0 for depth. Remember: for this analysis we did not trim out the initial locations when the bird was probably still on its nest, which might explain all those near-zero values for depth.
+So, we see that class 5 indeed corresponds with NC (not classified, there are no values) and classes 1 and 2 seem to be mainly on or near land locations (but not only)--notice the large number of values near 0 for depth. Remember: for this analysis we did not trim out the initial locations when the bird was probably still on its nest, which might explain all those near-zero values for depth.
 
 We see that the boxes for class 3 and 4 overlap a great deal, but there is some difference. Class 4 is associated with shallower water. Let's focus on those two classes and see if there is a significance difference in the depth values according to a t-test. Note, in a thorough analysis you would probably not use a t-test, because these data violate the assumption of independence --- they are auto-correlated because they are measured one after the other in a temporal sequence. They are also unlikely to be normally distributed. But that's a discussion for another time!
 
