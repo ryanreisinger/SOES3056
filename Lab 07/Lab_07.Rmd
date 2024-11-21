@@ -24,9 +24,9 @@ that students used last year.
 
 This step (finding data) can sometimes we difficult and frustrating. Go
 easy on yourself: stay patient and ask for help, from your classmates,
-me and Mark, or the internet.
+me and Josh, or the internet.
 
-Ask me and Mark about different datasets that you might want to use.
+Ask me and Josh about different datasets that you might want to use.
 Usually every new dataset requires a bit of 'wrangling' to get it to
 work. Be patient with that step--it's an integral part of data science.
 
@@ -37,8 +37,9 @@ work. Be patient with that step--it's an integral part of data science.
 Refer back to Lab 04 where you practiced using the `marmap` package
 (<https://cran.r-project.org/package=marmap>) to download bathymetry
 data. You could also download data manually from NOAA
-(<https://www.ngdc.noaa.gov/mgg/global/global.html>) or GEBCO
-(<https://www.gebco.net/>).
+(<https://www.ncei.noaa.gov/products/etopo-global-relief-model>) or
+GEBCO
+(<https://www.gebco.net/data_and_products/gridded_bathymetry_data/>).
 
 # Environmental data
 
@@ -62,14 +63,20 @@ products with a global spatial coverage at:
 <https://data.marine.copernicus.eu/products?facets=areas%7EGlobal+Ocean>
 
 Once you have selected a data product you are interested in, click on
-the 'data access' button in the toolbar on the left, which will bring up
-several download options. You will need to register for a free account
-first. You could, for example, click on the 'Browse' link to access the
-folder and raw files directly using your browser (e.g.,
-<https://data.marine.copernicus.eu/product/GLOBAL_ANALYSIS_FORECAST_BIO_001_028/files?subdataset=global-analysis-forecast-bio-001-028-daily_202211>)
-or click on the 'MOTU' link to enter parameters (like spatial and
-temporal extent) and then download the resulting `.nc` file. You can
-explore the dataset visually by clicking on the map icon at top right.
+the 'data access' button in the toolbar on the left, which load a more
+detailed page with different download options. You will need to register
+for a free account first. You could, for example, click on the 'Browse'
+links in the 'Files' column to access the folder and raw files directly
+using your browser (e.g.,
+<https://data.marine.copernicus.eu/product/GLOBAL_ANALYSISFORECAST_BGC_001_028/files>)
+or 'Form' links in the 'Subset' column to enter parameters (like spatial
+and temporal extent) and then download the resulting `.nc` file. This
+webpage has more details about how to use the Graphical User Interface
+to download data:
+[https://help.marine.copernicus.eu/en/articles/8078281-how-to-download-copernicus-marine-products-using-our-graphical-user-interfaces](https://help.marine.copernicus.eu/en/articles/8078281-how-to-download-copernicus-marine-products-using-our-graphical-user-interfaces#h_a270cbfc6d){.uri}
+
+You can explore the dataset visually by clicking on the map icon at top
+right.
 
 [![Figure 1. Exploring a data product visually by clicking the on the
 map icon.](resources/Copernicus_screenshot.jpg)](Figure%201)
@@ -155,7 +162,8 @@ chl <- terra::rast("./resources/erdMH1chlamday_R2022NRT_2b95_1e81_5998_U16704033
 # Plot to check
 plot(chl)
 
-# For some reason, it is upside down! So flip it:
+# For some reason the raster is upside down, so let's flip it right-way up
+# Flip it
 chl <- flip(chl, direction = "vertical")
 plot(chl)
 
@@ -173,12 +181,6 @@ chl <- terra::rast("./resources/my_chl.nc")
 chl <- flip(chl, direction = "vertical")
 
 # Plot it
-plot(chl)
-```
-
-```{r}
-# For some strange reason, raster package gets this right, with no need to flip:
-chl <- raster::raster("./resources/my_chl.nc")
 plot(chl)
 ```
 
@@ -207,9 +209,9 @@ You can use the NASA Ocean Color L3 browser:
 # Other data sources
 
 If you encounter a product you're interested in using, speak to me or
-Mark about how to access and use the data for your assessment.
+Josh about how to access and use the data for your assessment.
 
-These are some of the datasets that Seascapers last year used:
+These are some of the datasets that Seascapers have used previously:
 
 -   Animal tracking data from
     [Movebank](https://www.movebank.org/cms/movebank-main) (refer to the
@@ -231,6 +233,8 @@ These are some of the datasets that Seascapers last year used:
 -   Data on the potential habitat of
     [sardines](https://coastwatch.pfeg.noaa.gov/erddap/griddap/sardine_habitat_modis.html)
 
+Often, papers will publish the data they used to do their work.
+
 Remember, you need to fully cite your data source, and you'll need to
 report its characteristics (like spatiotemporal extent and resolution).
 Refer the the marking rubric for the assignment.
@@ -238,6 +242,6 @@ Refer the the marking rubric for the assignment.
 # Practice
 
 Start playing around with these data sources, and start thinking about
-what you want to do for your assessment. Mark and I will walk around to
+what you want to do for your assessment. Josh and I will walk around to
 answer questions, and next week is a drop-in session where you can bring
 your ideas and/or datasets for help.
