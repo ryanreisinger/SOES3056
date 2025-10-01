@@ -3,10 +3,10 @@ title: "Seascape Ecology"
 author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
+  html_document:
+    df_print: paged
   word_document: default
   pdf_document:
-    df_print: paged
-  html_document:
     df_print: paged
 subtitle: "Lab 01 - R Refresher"
 highlight: tango
