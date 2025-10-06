@@ -4,9 +4,9 @@ author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
   word_document: default
-  pdf_document:
-    df_print: paged
   html_document:
+    df_print: paged
+  pdf_document:
     df_print: paged
 subtitle: "Lab 02 - Scripts, project management, and workflows"
 highlight: tango
@@ -126,7 +126,7 @@ Our first part of this lab tackles the **tidy** step of the process in Figure 1,
 1. Lesson 05: Exploring Data Frames <https://swcarpentry.github.io/r-novice-gapminder/05-data-structures-part2.html>.
 2. Lesson 06: Subsetting Data <https://swcarpentry.github.io/r-novice-gapminder/06-data-subsetting.html>
 
-Mark and I will be walking around to help out and answer questions. We'll take 30 minutes to work through the two exercises, then we'll carry on with Part 2 of the lab together.
+Josh and I will be walking around to help out and answer questions. We'll take 30 minutes to work through the two exercises, then we'll carry on with Part 2 of the lab together.
 
 Before doing Lesson 05, you will need to re-create or re-load the `cats` data from Lesson 04 last week.
 
@@ -143,19 +143,18 @@ cats <- read.csv("data/feline_data.csv")
 cats <- read.csv("https://raw.githubusercontent.com/swcarpentry/r-novice-gapminder/main/episodes/data/feline-data.csv")
 ```
 
-You will also need to download the `gapminder` dataset. If you don't manage to download it from the internet using the following R code, you can download it from Blackboard.
+You will also need to download the `gapminder` dataset. You can download it directly from the internet, then read it in using the following R code. If you don't manage to do this, you can download it from the module Github repository: https://github.com/ryanreisinger/SOES3056/tree/main/Lab%2002/data
 
 ```{r}
-# Download the gapminder file from the internet
+# Download the gapminder file from the internet, then read it into your workspace
 # Remember, check if you have the 'data' folder already
-download.file("https://raw.githubusercontent.com/swcarpentry/r-novice-gapminder/main/episodes/data/gapminder_data.csv",
-              destfile = "data/gapminder_data.csv")
+download.file("https://raw.githubusercontent.com/swcarpentry/r-novice-gapminder/main/episodes/data/gapminder_data.csv", destfile = "data/gapminder_data.csv")
 
 # Load it into your workspace
 gapminder <- read.csv("data/gapminder_data.csv")
 ```
 
-You could also read the .csv file directly in from the internet.
+You could also read the .csv file directly into your workspace from the internet without downloading it first, using the following code:
 
 ```{r}
 # Read the .csv file directly from a URL
@@ -176,11 +175,11 @@ R will ignore anything on a line following the octothorpe symbol (pound/hash/num
 
 For example:
 ```{r}
-# An Awesome Script
+# My Dissertation Script
 # Ryan Reisinger
-# 2022-10-12
-# This script loads a great dataset, does all the cleaning up automatically,
-# generates some cool plots, and runs a basic statistical model.
+# 2025-10-06
+# This script loads my dissertation dataset, does all the cleaning up automatically,
+# generates some plots, and runs a basic statistical model.
 ```
 
 It is recommended that you always start your script with the packages that you need. That way, if you share your code with others, they can easily see what packages they need to install.
