@@ -31,10 +31,10 @@ world$geom
 class(world$geom)
 
 # Let's plot the world object
-plot(world) # Notice that there is a map for each variable in the dataset
+plot(world) # Notice that there is a map for each variable in the dataset (e.g., 'iso_a2', 'name_long', etc.)
 
 
-summary(world["lifeExp"]) # Notice the 'sticky' behaviour - R reports the geometry too
+summary(world["lifeExp"]) # Notice the 'sticky' behaviour - R reports the geometry ('geom') too
 
 # Subsetting this object
 world_mini <- world[1:2, 1:3]
@@ -47,11 +47,11 @@ plot(world_mini) # first two rows, so only two countries - Fiji and Tanzania
 # We'll use one of the files included with the 'spData' package
 
 # We can read it in as a sf data frame with the 'st_read' function
-world_dfr <- st_read(system.file("shapes/world.shp", package = "spData"))
+world_dfr = st_read(system.file("shapes/world.gpkg", package = "spData"))
 class(world_dfr) # See the class? 'sf' and 'data.frame'
 
 # Or as a 'tibble' which is a special kind of dataframe used in the 'tidyverse'
-world_tbl <- read_sf(system.file("shapes/world.shp", package = "spData"))
+world_tbl = read_sf(system.file("shapes/world.gpkg", package = "spData"))
 class(world_tbl) # See the class? 'sf' and 'tbl_df' and 'tbl' ('tibbles')
 
 # The 'sf' package is becoming the new standard for working with vector data, but
@@ -186,6 +186,9 @@ crs(my_rast) # its coordinate reference system (CRS) -- see section 7.8 in the b
 
 # Section 2.3.3 - a basic map
 plot(my_rast)
+# If you get an error here, expand or reset your plotting window with the broom icon, or do:
+dev.off() # to reset the plotting 'device' (window)
+plot(my_rast)
 
 # There are several more powerful plotting packages which you can use to make more advanced maps
 # plotRGB() from the terra package
@@ -216,11 +219,12 @@ plot(multi_rast) # see, each layer is plotted
 nlyr(multi_rast)
 
 # We can subset layers using their layer number or name
-multi_rast3 <- subset(multi_rast, 3)
-multi_rast4 <- subset(multi_rast, "landsat_4")
+multi_rast3 <- subset(multi_rast, 3) # layer number
+multi_rast4 <- subset(multi_rast, "landsat_4") # layer name
 plot(multi_rast4)
 
 # We can also combine multiple rasters using the c() function
 multi_rast34 <- c(multi_rast3, multi_rast4)
+plot(multi_rast34)
 
-
+# End
