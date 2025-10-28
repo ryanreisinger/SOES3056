@@ -65,7 +65,7 @@ class(world_sf)
 
 # Section 2.2.3 - basic maps
 plot(world[3:6]) # Plot three variables
-plot(world["pop"]) # Plot only one variable, selecting it by name
+plot(world["area_km2"]) # Plot only one variable, selecting it by name
 
 # We can add plots to one another by setting add = TRUE
 
@@ -94,6 +94,9 @@ plot(st_geometry(world_cents), add = TRUE, cex = cex)
 india <- world[world$name_long == "India", ] # select only 'India' from the world dataframe
 plot(st_geometry(india), expandBB = c(0, 0.2, 0.1, 1), col = "gray", lwd = 3) # we create some space around India. you might have to reset your plotting window
 plot(st_geometry(world_asia), add = TRUE) # Now we add Asia
+
+# Add country names (this is not in the Geocompr book, but useful to know)
+text(st_coordinates(st_centroid(world_asia)), labels = world_asia$name_long, cex = 0.7)
 
 # Section 2.2.6 Simple feature geometries (sfg) - low importance
 
