@@ -3,9 +3,9 @@ title: "Seascape Ecology"
 author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
+  word_document: default
   html_document:
     df_print: paged
-  word_document: default
   pdf_document:
     df_print: paged
 subtitle: "Lab 04 - Raster Analysis"
@@ -338,9 +338,9 @@ rm(sst)
 tmpFiles(remove = TRUE)
 ```
 
-We'll discuss getting data (including working with NetCDF) in more detail in a later lab, for the moment, let's read in some SST files that I have downloaded and converted raster for this lab. **On Blackboard: Course content -\> Labs -\> Lab 04-\> data-\> sst_files.**
+We'll discuss getting data (including working with NetCDF) in more detail in a later lab, for the moment, let's read in some SST files that I have downloaded and converted to raster for this lab. 
 
-You could also download them from Github: https://github.com/ryanreisinger/SOES3056/tree/main/Lab%2004/data/sst_files
+**You should download them from Github: https://github.com/ryanreisinger/SOES3056/tree/main/Lab%2004/data/sst_files**
 
 There are seven files (all with a .tif extension. Save these inside a folder called `sst_files` in your `data` directory.
 
@@ -435,9 +435,9 @@ plot(sst_gradient,
      main = "Sea surface temperature gradient")
 ```
 
-That's starting to look a bit like Figure 3.3 in the Seascape Ecology textbook, right? The green areas are regions with high sst gradient - they are places were SST is changing quickly across space. Ecotones?
+That's starting to look a bit like Figure 3.3 in the Seascape Ecology textbook, right? The green areas are regions with high SST gradient - they are places were SST is changing quickly across space. Ecotones?
 
-We can also apply this kind of fucntion to the whole stack using the `sapp()` function and in this case the function works layer by layer instead of calculating a value in each cell *across* all the layers.
+We can also apply this kind of function to the whole stack using the `sapp()` function and in this case the function works layer by layer instead of calculating a value in each cell *across* all the layers.
 
 ```{r}
 # Warning: this will take a while to run
@@ -454,7 +454,13 @@ For that we'll need the `grec` package.
 library(grec)
 
 # And run the function
-sst_fronts <- getGradients(sst_01)
+sst_fronts <- getGradients(as.matrix(sst_01, wide = T))
+
+# But we have to convert back to raster
+sst_fronts <- rast(sst_fronts) # convert back to a terra raster
+# Copy spatial reference and extent from sst_01
+terra::ext(sst_fronts) <- terra::ext(sst_01)
+terra::crs(sst_fronts) <- terra::crs(sst_01)
 
 # And plot
 plot(sst_fronts)
