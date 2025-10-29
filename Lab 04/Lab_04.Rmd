@@ -34,7 +34,7 @@ You'll often want to use bathymetry data in your work, be it simple for maps, or
 
 There are a few commonly-used sources for global bathymetry data, including ETOPO (<https://www.ngdc.noaa.gov/mgg/global/global.html>) and GEBCO (<https://www.gebco.net/>). You can manually download these data from the websites, but today we'll try and use the `marmap` package (https://cran.r-project.org/package=marmap) to download data from inside RStudio.
 
-If you can't get `marmap` to work (sometimes it doesn't install, or refuses to download files), I have uploaded the files to Blackboard.
+If you can't get `marmap` to work (sometimes it doesn't install, or refuses to download files), the files are on the Seascape Ecology Github site.
 
 First, we need to install `marmap`, and other packages we will use.
 
@@ -299,32 +299,25 @@ I went to the NASA Earth Observations website for sea surface temperature data f
 
 MODIS (Moderate Resolution Imaging Spectroradiometer) is a sensor on board NASA's Aqua satellite: <https://modis.gsfc.nasa.gov/>
 
-I chose monthly ('1 mo') data for August 2023, downloaded this as 'GeoTIFF (raster)', at 0.1 degrees resolution.
+I chose monthly ('1 mo') data for August 2025, downloaded this as 'GeoTIFF (raster)', at 0.1 degrees resolution.
 
-We then click on 'Download Raw Data' (double red underline in the screenshot below). You'll need to register (quick and free) to download the data.
+Clicking on the '3600 x 1800' text link (double red underline in the screenshot below) will download the data. You'll need to register (quick and free) to download the data.
 
-![A screenshot of the download page. I've highlighted with red boxes and underling some of the options I chose.](images/NASA_sst_download_screenshot.png)
+![A screenshot of the download page. I've highlighted with red boxes and underling some of the options I chose.](images/NASA_download_screenshot_02.png)
 
-I saved the file, called `AQUA_MODIS.20230901_20230930.L3m.MO.SST.sst.9km.nc` in a folder called `data` in my working folder. Remember, we don't want to touch our raw data and we want to keep it separate from things we are working on and manipulating (e.g, the derived raster called `papoue_terra` that I wrote to a file called `test_output.tiff` in the `output` folder -- that is a derived output).
 
-I've put this file on Blackboard if you want to download it from there instead. Remember to put it in a folder called `data` in your working directory. **On Blackboard: Course content -\> Labs -\> Lab 04 - Raster Analysis -\> Files for lab**.
+I saved the file, called `MYD28M_2025-08-01_rgb_3600x1800.TIFF` in a folder called `data` in my working folder. Remember, we don't want to touch our raw data and we want to keep it separate from things we are working on and manipulating (e.g, the derived raster called `papoue_terra` that I wrote to a file called `test_output.tiff` in the `output` folder -- that is a derived output).
 
-The file has the extension `.nc`, which means it is a NetCDF file, a really common format in oceanography and environmental science. But, this format can be really complicated. Sometimes you are lucky and `terra` can easily understand it. Let's try...
+This file is on the module's Github page: https://github.com/ryanreisinger/SOES3056/tree/main/Lab%2004/data 
 
 ```{r}
-# Read in the NetCDF file
-sst <- rast("data/AQUA_MODIS.20230901_20230930.L3m.MO.SST.sst.9km.nc")
+# Read in the GeoTiff file
+sst <- rast("./data/MYD28M_2025-08-01_rgb_3600x1800.TIFF")
 
 # Look at some properties
 sst
 
 # And plot
-plot(sst)
-
-# You will see the plot has two layers -- we want the first one only
-sst <- terra::subset(sst, 1) # Get only layer 1
-
-# Try plotting it again
 plot(sst)
 ```
 
@@ -338,7 +331,7 @@ rm(sst)
 tmpFiles(remove = TRUE)
 ```
 
-We'll discuss getting data (including working with NetCDF) in more detail in a later lab, for the moment, let's read in some SST files that I have downloaded and converted to raster for this lab. 
+We'll discuss getting data (including working with a format called NetCDF) in more detail in a later lab, for the moment, let's read in some SST files that I have downloaded. 
 
 **You should download them from Github: https://github.com/ryanreisinger/SOES3056/tree/main/Lab%2004/data/sst_files**
 
