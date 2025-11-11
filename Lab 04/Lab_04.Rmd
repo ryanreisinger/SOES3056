@@ -369,7 +369,7 @@ plot(sst_01)
 
 Notice the values. The temperature is measured in Kelvin, so we need to correct it.
 
-We can use *raster algebra* in various ways. In this case, we can substract a single value from the whole raster to make the correction.
+We can use *raster algebra* in various ways. In this case, we can subtract a single value from the whole raster to make the correction.
 
 ```{r}
 sst_01 <- sst_01 - 273.15 # We simply subtract the correction value

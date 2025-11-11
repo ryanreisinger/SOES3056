@@ -3,8 +3,9 @@ title: "Seascape Ecology"
 author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
+  word_document: default
   html_document: default
+  pdf_document: default
 subtitle: "Lab 05 - Analysing Animal Movement Data"
 highlight: tango
 urlcolor: blue
@@ -19,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This week we'll be trying our hand at some basic analyses of animal tracking data.
 
-There are numerous methods for analysing animal movement data, and many R packages too. Joo et al. (2019) provide a recent overview: <https://besjournals.onlinelibrary.wiley.com/doi/10.1111/1365-2656.13116#:~:text=https%3A//doi.org/10.1111/1365%2D2656.13116>. You''ll see in Table 1 of Joo et al. that for a given task several packages could be used. So, tools I've used in this tutorial are usually only one of the options. **I would encourage you to explore others.**
+There are numerous methods for analysing animal movement data, and many R packages too. Joo et al. (2019) provide a recent overview: <https://besjournals.onlinelibrary.wiley.com/doi/10.1111/1365-2656.13116#:~:text=https%3A//doi.org/10.1111/1365%2D2656.13116>. You''ll see in Table 1 of Joo et al. that for a given task several packages could be used. So, tools I've used in this tutorial are usually only one of the options. **I would encourage you to explore others.** For each step in our analysis, think about what what we're doing, rather than about the tools we're using. This will make it easier if you need or want to switch tools later.
 
 We'll be using GPS tracking data for two species of giant petrel: the northern giant petrel (*Macronectes halli*) and the southern giant petrel (*Macronectes giganteus*). The data come from a [paper where my colleagues and I looked at niche segregation in these sibling species](https://royalsocietypublishing.org/doi/full/10.1098/rsos.200649) - how do the two species (as well as males and females) avoid competing for the same resources?
 
@@ -29,22 +30,22 @@ Let's load the packages we'll be using.
 
 ```{r}
 library(dplyr) # for working with data
-library(rnaturalearth)
+library(rnaturalearth) # for map data
 library(rnaturalearthdata) # for map data
 library(ggplot2) # for plotting
 library(sf) # for working with spatial vector data
 library(geosphere) # distance calculations
-library(adehabitatHR)
+library(adehabitatHR) # for calculating utilisation distributions
 library(terra) # for working with rasters
 library(tidyterra) # for plotting terra rasters in ggplot
-library(EMbC)
-library(marmap)
+library(EMbC) # for classifying behaviour along tracks
+library(marmap) # for bathymetry data
 ```
 
 First, let's read in the tracking data directly from a URL.
 
 ```{r}
-# We can pass a URL, pointing to the tracking data on Github, directly to read.csv()
+# Instead of reading in the data from a file on our computers, we can point read.csv() directly to the tracking data on Github, using its URL
 tracks <- read.csv("https://github.com/ryanreisinger/giantPetrels/raw/master/Data/GP_tracks_2019-07-01.csv")
 ```
 
@@ -55,27 +56,27 @@ Let's take a look at the top of the file.
 head(tracks)
 ```
 
-The date and time are in two separate columns and they are also character vectors (notice the `<chr>` tag under the column names, and think back to your first lab, on data types).
+Notice that the date and time are in two separate columns and they are also character vectors (notice the `<chr>` tag under the column names, and think back to your first lab, on data types).
 
-So, let's first join those two columns (`date` and `time`) into a new column (`date_time`) and convert the new column to a column with class `POSIXlt`, which is a class used in R for dates and times.
+R has some spatial classes for date-time data, and many tracking packages use these. So, let's first join those two columns (`date` and `time`) into a new column (`date_time`) and convert that new column to a column with class `POSIXlt`, (one of the classes used in R for dates and times). For more on working dates, look at [this section](https://r4ds.hadley.nz/datetimes.html) from the R for Data Science book, or [this section](https://bookdown.org/rdpeng/rprogdatascience/dates-and-times.html) from R Programming for Data Science.
 
 ```{r}
 # 'date' and 'time' are currently character vectors
 class(tracks$date) 
 class(tracks$time)
 
-# Join these two columns in a new column
+# Join these two columns in a new column, using the paste() function
 tracks$date_time <- paste(tracks$date, tracks$time, sep = " ")
 
 # And convert to a date using the 'strptime' function
-# Notice that we set the timezone (argument 'tz') as 'UTC'
+# Notice that we set the timezone (argument 'tz') as 'UTC' (GMT)
 tracks$date_time <- strptime(tracks$date_time, format = "%Y/%m/%d %H:%M:%S", tz = "UTC")
 
 # Look at the class of the new column, to check
 class(tracks$date_time)
 
 # Also look at the first 6 entries of the column to check
-# that the date has been created correctly
+# that the date has been created correctly (if not, you would see NAs or other # weird things
 head(tracks$date_time)
 ```
 
@@ -108,7 +109,7 @@ world <- ne_countries(scale = "medium", returnclass = "sf")
 ggplot(data = world) +
     geom_sf()
 
-# And let's add our bird tracks on top
+# And let's add our petrel tracks on top
 ggplot(data = world) +
     geom_sf() +
   geom_point(data = tracks, aes(x = decimal_longitude,
@@ -143,7 +144,7 @@ ggplot(data = world) +
             ylim = c(min_y, max_y))
 ```
 
-We could use the same approach to colour the tracks by individual. Notice that I switch off the legend in `theme` since there are so many individuals (the legend would take up too much space).
+We could use the same approach to colour the tracks by individual. Notice that I switch off the legend in `theme`. There are so many individuals that the legend would take up too much space.
 
 ```{r}
 ggplot(data = world) +
@@ -158,7 +159,7 @@ ggplot(data = world) +
 
 # Basic analyses
 
-For the following analyses, we'll select one individual to work with. Let's use one of the northern giant petrels, with track id `NGP03_KD_SEP_2015`.
+For the following analyses, we'll select one individual to work with. In a 'real' analysis, you would work with all individuals. Let's use one of the northern giant petrels, with track id `NGP03_KD_SEP_2015`.
 
 ```{r}
 # Select one individual, creating a new dataframe called 'ngp'
@@ -198,13 +199,15 @@ ggplot(data = world) +
 We can calculate some basic parameters from the track, starting with the duration of the track and its spatial extent.
 
 ```{r}
+# Start and end date-time
 start_date <- min(ngp$date_time)
 end_date <- max(ngp$date_time)
+
 # We can do algebra with dates
 track_duration <- end_date - start_date
 track_duration
 
-# Note that track_duration is an object of class 'difftime'
+# Note that track_duration is an object of class 'difftime' (time difference)
 class(track_duration)
 
 # We could also do the following, if we want to control the units
@@ -222,7 +225,7 @@ track_duration <- difftime(time1 = end_date,
 track_duration
 ```
 
-Let's look at distance traveled, each step (that is, between each pair of locations) and in total (that is, the sum of all the steps). For this, we use the `geosphere` package.
+Let's look at distance traveled, for each 'step' (that is, between each pair of locations) and in total (that is, the sum of all the steps). For this, we use the `geosphere` package.
 
 ```{r}
 # Create a new column called 'distance'.
@@ -235,7 +238,7 @@ ngp$distance <- ngp$distance/1000
 sum(ngp$distance, na.rm = T) # We need na.rm = TRUE to remove NAs - the last value is NA
 ```
 
-Now let's look at the time steps, whereafter we can calculate speed (because we have just calculated distance, and speed is simply distance divide by time).
+Now let's look at the time steps, whereafter we can calculate speed (because we have just calculated distance, and speed is simply distance divided by time).
 
 ```{r}
 # First we calculate the time differenc between each pair of locations
@@ -247,14 +250,14 @@ timediff <- c(timediff, NA)
 ngp$timestep <- timediff
 
 # We needed to do a few things here
-# 1) Change the output from the 'diff' function into hours (it was in seconds)
-# 2) Coerce the result into a nummeric (it was a 'difftime' class)
-# 3) to add an NA at the end, since the diff funciton is not as clever as
+# 1) We changed the output from the 'diff' function into hours (it was in seconds)
+# 2) We coerced the result into a nummeric (it was a 'difftime' class)
+# 3) We added an NA at the end, since the diff funciton is not as clever as
 # distGeo, and doesn't automatically add it.
 
 ```
 
-Let's plot the frequency distributions (histograms) of step lengths and step durations. You will see in the histogram for step duration, there is a big outlier that we would normally deal with by filtering or some kind of inspection.
+Let's plot the frequency distributions (histograms) of step lengths and step durations. You will see in the histogram for step duration, there is a big outlier (\>15 hours) that we would normally deal with by filtering or some kind of inspection.
 
 ```{r}
 ggplot(data = ngp,
@@ -272,7 +275,7 @@ ggplot(data = ngp,
        y = "Frequency")
 ```
 
-Since we calculated step length and duration, we can work out speed in km/h, and map that. Note that in the call to ggplot, we replace the aesthetic (`aes`), `scientific_name` with `speed`, so we can colour each point by speed.
+Since we calculated step length and duration, we can work out speed in km/h, and colour our map with that value. Note that in the call to ggplot, we replace the aesthetic (`aes`), `scientific_name` (which we previously used to colour by species) with `speed`, so we can colour each point by speed.
 
 ```{r}
 ngp$speed <- ngp$distance / ngp$timestep
@@ -295,6 +298,7 @@ Related to the step length (distance), is calculating the displacement. This is,
 home <- ngp[1, c("decimal_longitude", "decimal_latitude")] # Select row 1 of the data
 
 # Now we use the distGeo function again
+# Here the function will look at each set of coordinates (p1) in the dataframe and calculate how far that is from 'home' (p2).
 ngp$displacement <- distGeo(p1 = ngp[,c("decimal_longitude", "decimal_latitude")],
                            p2 = home)
 
@@ -311,7 +315,7 @@ ggplot(data = ngp,
        y = "Displacement (km)")
 ```
 
-In the plot we can see that the line is initally flat (near-zero displacement), so lots of the first locations are likely to be while the bird was still sitting on its nest, after the tag was deployed on it. In a thorough analysis we would trim the track, manually or programatically, to remove these locations on the nest (or on the beach or shore for seals). Techniques called 'net squared displacement' and 'mean squared displacement' are sometime used to determine the kind of migratory behavior that animals are displaying, from these plots of displacement. See [Singh et al. (2016)](https://doi.org/10.1371/journal.pone.0149594) for more details.
+In the plot we can see that the line is initially flat (near-zero displacement), so lots of the first locations are likely to be while the bird was still sitting on its nest, after the tag was deployed on it. In a thorough analysis we would trim this first part of the track, manually or programatically, to remove these locations on the nest (or on the beach or shore for seals). Techniques called 'net squared displacement' and 'mean squared displacement' are sometime used to determine the kind of migratory behavior that animals are displaying, from these plots of displacement. See [Singh et al. (2016)](https://doi.org/10.1371/journal.pone.0149594) for more details.
 
 # Calculating utilization distributions
 
@@ -319,9 +323,9 @@ We'll use the `adehabitatHR` package (<https://cran.r-project.org/web/packages/a
 
 ## Minimum Convex Polygons
 
-Minimum convex polygons (MCPs) are one of the simplest estimators of spatial utilisation. MCPs are 'the smallest polygon around points with all interior angles less than 180 degrees. MCPs are common estimators of home range, but can potentially include area not used by the animal and overestimate the home range' (from <https://jamesepaterson.github.io/jamespatersonblog/03_trackingworkshop_homeranges>).
+Minimum convex polygons (MCPs) are one of the simplest estimators of spatial utilisation. MCPs are 'the smallest polygon around points with all interior angles less than 180 degrees. MCPs are common estimators of home range, but can potentially include area not used by the animal and overestimate the home range' (from <https://jamesepaterson.github.io/jamespatersonblog/03_trackingworkshop_homeranges>). Remember from the animal movement lecture where I spoke about overestimation.
 
-Calculating utilsiation distributions with adehabitat takes a little bit of preparation. Let's calculate MCPs...
+Calculating utilisation distributions with adehabitat takes a little bit of preparation. Let's calculate MCPs...
 
 ```{r}
 # First, we need to create an object of class 'spatial points' (a vector format) to use in the mcp function.
@@ -333,7 +337,7 @@ library(sp)
 ngp_sp <- ngp
 
 # The mcp function only allows one extra column, the animal id, so we
-# select only three columns
+# select only three columns from our dataframe. The latitude, the longitude, and the animal ID (remember, basic mcp doesn't care about time).
 ngp_sp <- dplyr::select(ngp_sp,
                         decimal_longitude,
                         decimal_latitude,
@@ -433,7 +437,7 @@ Remember that the **low kde value represents high density**. Notice how the kde 
 
 # Behavioural classification
 
-There are many ways of estimating behaviour from movement data. Figure 7.9 in Pittman lists several. We'll look at a method called Expectation Maximisation Binary Clustering (EMbC) (Garriga).
+There are many ways of estimating behaviour from movement data. Figure 7.9 in Pittman lists several. We'll look at a method called Expectation Maximisation Binary Clustering (EMbC) (Garriga et al. 2016 <https://doi.org/10.1371/journal.pone.0151984>).
 
 A quick start guide is at <https://rdrr.io/cran/EMbC/f/vignettes/EMbC_qckref.Rmd>
 
@@ -460,7 +464,7 @@ We can look at the labelled (annotated) trajectory over time.
 lblp(mybcp)
 ```
 
-Or map the labelled trajectory. Think about how these classifications relate to the animal's behaviour (for example, the Area Restricted Search Behaviour we talked about in lectures 6 and 7).
+Or map the labelled trajectory. Think about how these classifications relate to the animal's behaviour (for example, the Area Restricted Search behaviour we talked about in lectures 6 and 7).
 
 ```{r}
 view(mybcp)
@@ -472,6 +476,9 @@ We can get these specific outputs from the EMbC object, and add them to our data
 
 # We can look at the cutoff values for each classification with
 mybcp@R
+
+# Notice the '@' syntax. In some types of more complicated R objects, we use @ to access a particular 'slot' or part of the object (where that object has different parts to it). Remember, you can always look at how an object is structured using the 'str' function. E.g.:
+str(mybcp) # See all the '@'s designating the parts or slots
 
 # We can write the outputs to the data frame
 ngp_embc_data$embc_velocity <- mybcp@X[,1]
@@ -515,9 +522,9 @@ bathy <- getNOAA.bathy(lon1=min_x,lon2=max_x, lat1=min_y,lat2=max_y,resolution=4
 # overwhelmed), you can
 # 'uncomment' (by removing the preceding # sign) and run the following line
 # after downloading the file
-# from Blackboard and saving it in a folder called 'data'.
+# from github (https://github.com/ryanreisinger/SOES3056/blob/main/Lab%2005/data/bathy.RDS) and saving it in a folder called 'data'.
 
-# bathy <- readRDS
+# bathy <- readRDS("./data/bathy.RDS")
 
 # Convert it to a raster-raster, then to a terra raster
 bathy <- marmap::as.raster(bathy)
