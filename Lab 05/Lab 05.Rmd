@@ -3,9 +3,9 @@ title: "Seascape Ecology"
 author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
+  pdf_document: default
   word_document: default
   html_document: default
-  pdf_document: default
 subtitle: "Lab 05 - Analysing Animal Movement Data"
 highlight: tango
 urlcolor: blue
@@ -35,6 +35,7 @@ library(rnaturalearthdata) # for map data
 library(ggplot2) # for plotting
 library(sf) # for working with spatial vector data
 library(geosphere) # distance calculations
+library(CircStats) # required by adehabitatHR
 library(adehabitatHR) # for calculating utilisation distributions
 library(terra) # for working with rasters
 library(tidyterra) # for plotting terra rasters in ggplot
@@ -263,14 +264,14 @@ Let's plot the frequency distributions (histograms) of step lengths and step dur
 ggplot(data = ngp,
        aes(x = distance)) +
          geom_histogram() +
-  labs(main = "Step length distribution",
+  labs(title = "Step length distribution",
        x = "Step length (km)",
        y = "Frequency")
 
 ggplot(data = ngp,
        aes(x = timestep)) +
          geom_histogram() +
-  labs(main = "Step duration distribution",
+  labs(title = "Step duration distribution",
        x = "Step duration (hours)",
        y = "Frequency")
 ```
@@ -310,7 +311,7 @@ ggplot(data = ngp,
        aes(x = as.POSIXct(date_time), y = displacement)) +
        geom_path() +
          geom_point() +
-  labs(main = "Displacement plot",
+  labs(title = "Displacement plot",
        x = "Date",
        y = "Displacement (km)")
 ```
@@ -539,7 +540,7 @@ ggplot(data = world) +
     geom_point(data = ngp_embc_data, aes(x = decimal_longitude,
                                 y = decimal_latitude,
                                 colour = as.factor(embc_label))) +
-  # and then we 'zoom' the map -- note I euse the limits we just calculated
+  # and then we 'zoom' the map -- note I use the limits we just calculated
     coord_sf(xlim = c(min_x, max_x),
             ylim = c(min_y, max_y))
 ```
@@ -548,6 +549,11 @@ We can now use a handy feature to 'extract' the values from the bathymetry raste
 
 ```{r}
 ngp_embc_data$depth <- terra::extract(bathy, ngp_embc_data[,c("decimal_longitude", "decimal_latitude")])$layer
+
+# Notice that we use $layer to access the first layer of the raster
+# to get the depths, here (unhelpfully!) named 'layer'
+# Remember you can see the names of raster layers with:
+# names(bathy)
 
 # If we look at the first few rows now, we see depth is added as a column
 head(ngp_embc_data)
