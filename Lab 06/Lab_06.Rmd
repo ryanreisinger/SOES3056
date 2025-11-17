@@ -3,11 +3,11 @@ title: "Seascape Ecology"
 author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    df_print: paged
+  word_document: default
   html_document:
     df_print: paged
-  word_document: default
+  pdf_document:
+    df_print: paged
 subtitle: "Lab 06 - R Markdown"
 highlight: tango
 urlcolor: blue
@@ -42,7 +42,7 @@ You will be using R Markdown for your workflow assessments.
 
 # What is R Markdown?
 
-R Markdown (<https://rmarkdown.rstudio.com/>) is a document format that allows us to embed pieces (called "chunks") of computer code and output like figures in a document. The document you are reading now is made with R Markdown, as are all the other tutorials you have been using in this module.
+R Markdown (<https://rmarkdown.rstudio.com/>) is a document format that allows us to embed pieces (called "chunks") of computer code and output such as figures in a document. The document you are reading now is made with R Markdown, as are all the other tutorials you have been using in this module.
 
 Xie et al. write:
 
@@ -56,7 +56,7 @@ Xie et al. write:
 
 R Studio has a short introductory video at <https://rmarkdown.rstudio.com/lesson-1.html>.
 
-R Markdown consists of a file, with extension .Rmd, that contains text in the Markdown format -- a simple way of formatting the text with things like headings, bold, links, etc. -- and code. A report is created automatically by running the code (and printing the code and/or results in the output document if you wish) and 'rendering' the text. Reports can be in various formats like HTML (this document) or PDF (see previous labs).
+R Markdown consists of a file, with extension .Rmd, that contains text in the Markdown format -- a simple way of formatting the text with things like headings, bold, links, etc. -- and code. A report is created automatically by running the code (and printing the code and/or results in the output document if you wish) and 'rendering' the text. Reports can be in various formats like HTML or PDF.
 
 The best guide to R Markdown is the free and open-source R Markdown book by Xie et al.: [https://bookdown.org/yihui/rmarkdown/](https://bookdown.org/yihui/rmarkdown/basics.html)
 
@@ -71,18 +71,18 @@ We'll assume you have both R and R Studio installed. To use R Markdown we'll nee
 # 'tech') installation.
 # TeX is a typesetting programme.
 # Installing TeX might not work on the University computers. If not, 
-# it's okay -- we can still produce HTML files.
+# it's okay -- we can still produce HTML files without a TeX install.
 
 # We will use tinytex https://yihui.org/tinytex/
 
 # First install tinytex
-# This might not work on the uni. computers.
+# This might not work on the University computers.
 install.packages('tinytex')
 library(tinytex)
 tinytex::install_tinytex()
 
 # If you have difficulty, follow instruction at the link below,
-# or just stick to HTML output
+# or just stick to HTML output (tinytex is only required for PDF output)
 # https://yihui.org/tinytex/
 
 # Next, install rmarkdown
@@ -97,29 +97,29 @@ You can have a look at at the basics in the R Markdown book (<https://bookdown.o
 
 We're going to use R Studio to create an R Markdown.
 
-## Create a folder for your working directory
+## 1. Create a folder for your working directory
 
-The first step is to create an empty directory that you will use as your working directory, where you will save the Markdown file and keep all your data and outputs. It is important to keep everything in one folder. For your assessment you will hand in this single folder containing everything needed to recreate the report and analysis. This is good practice for the 'real world' -- you can use this approach to give someone else evertything they need to do an analysis, or if running your analyses on a different computer.
+The first step is to create an empty directory that you will use as your working directory, where you will save the Markdown file and keep all your data and outputs. It is important to keep everything in one folder. For your assessment you will hand in this single folder containing everything needed to recreate the report and analysis. This is good practice for the 'real world' -- you can use this approach to give someone else everything they need to do an analysis, or if running your analyses on a different computer.
 
 I'll create a new, empty folder called `seascape_project`.
 
-## Create a new R Markdown document
+## 2. Create a new R Markdown document
 
-After having installed `rmarkdown`, close and re-open R Studio. Click on 'File' then 'New file' then 'R Markdown'. This should bring up a window (Figure 1) where you can choose the document type at left (we want a Document) and specify some parameters: title (title of your document - will appear as the the title of the report), author (your name), date (you can enter a date, or opt to use the current date by selecting 'Use current date when rendering document'), and the default output format. If you have had any problems installing a TeX programme (e.g., TinyTeX), then select HTML. You can still choose to 'render' different formats, this is simply the default. Click 'OK'.
+After having installed `rmarkdown`, close and re-open R Studio. Click on 'File' then 'New file' then 'R Markdown'. This should bring up a window (Figure 1) where you can choose the document type at left (we want a Document) and specify some parameters: title (title of your document - will appear as the the title of the report), author (your name), date (you can enter a date, or opt to use the current date by selecting 'Use current date when rendering document'), and the default output format. If you have had any problems installing a TeX programme (e.g., TinyTeX), then select HTML. You can still choose to 'render' different formats, this is simply the default for when you click the 'Knit' button. Click 'OK'.
 
 [![Figure 1. The R Studio interface for creating a new R Markdown document.](Resources/Screenshot_new_markdown.png)](Figure%201)
 
-## Save the document
+## 3. Save the document
 
 This will open up a new tab in R Studio with an R Markdown document that looks something like that in Figure 2.
 
 [![Figure 2. A new R Markdown file in R Studio.](Resources/Screenshot_markdown_template.png)](Figure%202)
 
-Now, save this file in the directory you just created. Click 'File' then 'Save' or 'Save as' (or use the small blue stiffy disk icon). We use the same structure as for saving scripts: keep everything you need together in a single folder, ideally with subfolders.
+Now, save this file in the directory you just created (in my case, 'seascape_project'. Click 'File' then 'Save' or 'Save as' (or use the small blue stiffy disk icon). We use the same structure as for saving scripts: keep everything you need together in a single folder, ideally with subfolders (for data, for example).
 
-## Knit an HTML document
+## 4. Knit an HTML document
 
-Before we change anything in this file, let's try 'rendering' or 'knitting' it. Find the blue ball of wool/yarn icon with 'Knit' next to it, highlighted in Figure 3, and click on that. This should open a dialogue asking you where you want to save the output file. I recommend your working directory, or even a sub directory for outputs.
+Before we change anything in this file, let's try 'rendering' or 'knitting' it. Find the blue ball of wool/yarn icon with 'Knit' next to it, highlighted in Figure 3, and click on that. This should open a dialogue asking you where you want to save the output file. I recommend choosing your working directory, or even a sub directory for outputs.
 
 [![Figure 3. The 'knit' button.](Resources/Screenshot_markdown_template_knit.png)](Figure%203)
 
@@ -133,7 +133,7 @@ If you look near the top left of the tab, you'll see you can toggle between 'Sou
 
 ## Code chunks
 
-You'll see that, interspersed through the text, there are sections of code (called 'chunks') that are are delineated with three backtick symbols and `r` in curly braces:
+You'll see that, interspersed through the text, there are sections of code (called 'chunks') that are are delineated with three backtick symbols (\`) and `r` in curly braces:
 
 ```` ``` {r} ````
 
@@ -163,7 +163,7 @@ In the R Markdown file (`.Rmd`), in RStudio, you can run each chunk by clicking 
 
 # Your turn
 
-These are just some simple instructions to get you up and running. For homework, work through the lessons on R Studio's Markdown site: <https://rmarkdown.rstudio.com/lesson-1.html>. 
+These are just some simple instructions to get you up and running. For homework, work through the lessons on R Studio's Markdown site: <https://rmarkdown.rstudio.com/lesson-1.html>.
 
 Their reference guide (<https://rmarkdown.rstudio.com/docs/reference/index.html>) and cheatsheet (<https://github.com/rstudio/cheatsheets/raw/main/rmarkdown-2.0.pdf>) are also good.
 
@@ -171,11 +171,10 @@ For more complete information, look at the R Markdown book by Xie et al.: <https
 
 For homework, or in the lab session if you have time, try to convert the first parts of some of your scripts from previous weeks into R Markdown scripts, and try to produce HTML reports. Create a new R Markdown document as described above (or use the one we made above), and copy your R scripts into code 'chunks'. It's up to you to decide how to split up these chunks. Usually a chunk will be some kind of block of code, doing a specific step, with some kind of text in-between.
 
-Remember, for your final assessment you should hand in a single folder which contains all the data and scripts (ideally, R Markdown `.Rmd` + report output) for a seascape analysis.
+**Remember, for your final assessment you should hand in a single folder which contains all the data and scripts (ideally, R Markdown `.Rmd` + report output) for a seascape analysis.**
 
 For example, my folder structure to create this lab looks like this:
 
 [![Figure 5. My directory structure for this lab](Resources/Screenshot_directory_structure.png)](Figure%205)
 
-For more examples, you can also look at how I made any of the labs for this module. They are all available on the module's Github page:
-<https://github.com/ryanreisinger/SOES3056>
+For more examples, you can also look at how I made any of the labs for this module. They are all available on the module's Github page: <https://github.com/ryanreisinger/SOES3056>
