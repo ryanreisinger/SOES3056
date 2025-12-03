@@ -4,9 +4,9 @@ author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
   word_document: default
-  html_document:
-    df_print: paged
   pdf_document:
+    df_print: paged
+  html_document:
     df_print: paged
 subtitle: "Lab 08 - Seascape Change"
 highlight: tango
@@ -329,7 +329,9 @@ We could look at the trend in each pixel (rather than the overall trend, as we d
 
 The first is a spatial version of Kendall's Tau. The function we could use is `tau` from `terra`. This calculates the trend in each pixel. (You will get warnings running this, you can safely ignore them).
 
-```{r}
+Running this next block produces lots of warnings that I don't want to include in my final knitted document, so I have included `warning=FALSE` in the chunk options for this chunk, like this: ```{r warning=FALSE}```
+
+```{r warning = FALSE}
 # layer index as time (1:8)
 time <- 1:nlyr(fish_2020)
 # run the function
@@ -342,7 +344,6 @@ plot(tau)
 We could also use the `regress()` function in `terra`, which runs a linear regression (linear model) for each pixel in the raster. We can then plot the slope and intercept of the regression line.
 
 ```{r}
-# fish_trend <- kendall(stack(fish_2020)) # This would fail because there are all NA values in the raster where we have land, as well as all NAs in some months, causing less than 8 observations in some pixels.
 fish_trend <- regress(fish_2020, 1:nlyr(fish_2020)) # This works.
 plot(fish_trend)
 
