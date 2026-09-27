@@ -79,7 +79,7 @@ Lesson 03 Seeking Help <https://swcarpentry.github.io/r-novice-gapminder/03-seek
 
 # This week
 
-This week we’ll continue refreshing a few concepts from your first year module SOES 1015 (Part 1), and we'll start to explore workflow and project management (Part 2):
+This week we’ll continue refreshing a few concepts from your first year module SOES 1017 (Part 1), and we'll start to explore workflow and project management (Part 2):
 
 Part 1
 
@@ -126,7 +126,7 @@ Our first part of this lab tackles the **tidy** step of the process in Figure 1,
 1. Lesson 05: Exploring Data Frames <https://swcarpentry.github.io/r-novice-gapminder/05-data-structures-part2.html>.
 2. Lesson 06: Subsetting Data <https://swcarpentry.github.io/r-novice-gapminder/06-data-subsetting.html>
 
-Josh and I will be walking around to help out and answer questions. We'll take 30 minutes to work through the two exercises, then we'll carry on with Part 2 of the lab together.
+I will be walking around to help out and answer questions. We'll take 30 minutes to work through the two exercises, then we'll carry on with Part 2 of the lab together.
 
 Before doing Lesson 05, you will need to re-create or re-load the `cats` data from Lesson 04 last week.
 
@@ -136,14 +136,16 @@ cats <- data.frame(coat = c("calico", "black", "tabby"),
 								weight = c(2.1, 5.0, 3.2),
 								likes_string = c(1, 0, 1))
 
-# Or load the cats data from file
+# Or, if you are using the same folder/working directory as last week, load the cats data from file
 cats <- read.csv("data/feline_data.csv")
 
-# Or get it directly from the internet
+# Alternatively, get it directly from the internet (sometimes this fails)
 cats <- read.csv("https://raw.githubusercontent.com/swcarpentry/r-novice-gapminder/main/episodes/data/feline-data.csv")
 ```
 
-You will also need to download the `gapminder` dataset. You can download it directly from the internet, then read it in using the following R code. If you don't manage to do this, you can download it from the module Github repository: https://github.com/ryanreisinger/SOES3056/tree/main/Lab%2002/data
+You will also need to download the `gapminder` dataset. You can download it directly from the internet, then read it in using the following R code. If you don't manage to do this, you can download it from the Seascape Ecology Github repository: https://github.com/ryanreisinger/SOES3056/tree/main/Lab%2002/data
+
+If you download the file yourself, put it in your working directory.
 
 ```{r}
 # Download the gapminder file from the internet, then read it into your workspace
@@ -177,7 +179,7 @@ For example:
 ```{r}
 # My Dissertation Script
 # Ryan Reisinger
-# 2025-10-06
+# 2026-09-28
 # This script loads my dissertation dataset, does all the cleaning up automatically,
 # generates some plots, and runs a basic statistical model.
 ```
@@ -186,7 +188,7 @@ It is recommended that you always start your script with the packages that you n
 
 Hadley and Grolemund say:
 
-*"The key to using the script editor effectively is to memorise one of the most important keyboard shortcuts: Cmd/Ctrl + Enter. This executes the current R expression in the console... It will also move the cursor to the next statement (beginning with not_cancelled %>%). That makes it easy to run your complete script by repeatedly pressing Cmd/Ctrl + Enter."*
+*"The key to using the script editor effectively is to memorise one of the most important keyboard shortcuts: Cmd/Ctrl + Enter. This executes the current R expression in the console... It will also move the cursor to the next statement (beginning with >). That makes it easy to run your complete script by repeatedly pressing Cmd/Ctrl + Enter."*
 
 You can also execute (run) a whole script, from the first to the last line, using Cmd/Ctrl + Shift + S. Doing this regularly is a great way to check that you’ve captured all the important parts of your code in the script.
 
