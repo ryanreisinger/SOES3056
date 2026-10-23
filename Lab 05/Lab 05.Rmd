@@ -3,9 +3,9 @@ title: "Seascape Ecology"
 author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
   word_document: default
   html_document: default
+  pdf_document: default
 subtitle: "Lab 05 - Analysing Animal Movement Data"
 highlight: tango
 urlcolor: blue
@@ -620,3 +620,11 @@ To find more movement data which you can use directly in R, explore the `move` p
 <https://cran.r-project.org/web/packages/move/vignettes/move.html>
 
 <https://cran.r-project.org/web/packages/move/vignettes/browseMovebank.html>
+
+# Much more on analysing animal movement data, from the aniMove workshops
+
+## 2024
+
+Lecture recordings: <https://animove.org/lecture-recordings-2024/>
+
+Downloads: <https://animove.org/copy-elearning-downloads/>

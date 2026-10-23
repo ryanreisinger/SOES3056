@@ -3,10 +3,10 @@ title: "Seascape Ecology"
 author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
+  pdf_document:
+    df_print: paged
   word_document: default
   html_document:
-    df_print: paged
-  pdf_document:
     df_print: paged
 subtitle: "Lab 04 - Raster Analysis"
 highlight: tango
@@ -39,9 +39,8 @@ If you can't get `marmap` to work (sometimes it doesn't install, or refuses to d
 First, we need to install `marmap`, and other packages we will use.
 
 ```{r eval=FALSE, include=TRUE}
-# Install marmap library
-# Note, by setting 'dependencies = TRUE', I am asking R to also install all the packages marmap needs
-# to work
+# Install marmap library Note, by setting 'dependencies = TRUE', I am asking R
+# to also install all the packages marmap needs to work
 install.packages("marmap",
                  repos = "https://cran.rstudio.com/",
                  dependencies = TRUE)
@@ -76,21 +75,26 @@ NOAA hosts the ETOPO dataset, so this function is going to download it.
 Let's reproduce the example in the `marmap` vignette ['Analysing bathymetric data in R with marmap'](https://cran.r-project.org/web/packages/marmap/vignettes/marmap-DataAnalysis.pdf).
 
 ```{r}
-# We pass two longitude values and two latidue values to the function to define the extent of the area we want. The resolution argument specifies the resolution of the grid in minutes. We are working with an unprojected coordinate system, in longitude and latitude measured in degrees: each degree is divided into 60 minutes.
+# We pass two longitude values and two latidue values to the function to define
+# the extent of the area we want. The resolution argument specifies the
+# resolution of the grid in minutes. We are working with an unprojected
+# coordinate system, in longitude and latitude measured in degrees: each degree
+# is divided into 60 minutes.
 papoue <- getNOAA.bathy(lon1=140, lon2=155, lat1=-13, lat2=0, resolution=4)
 
-# IF THE FUNCTION DOES NOT WORK:
-# If you can't get this function to work (sometimes NOAA's servers get overwhelmed), you can
-# 'uncomment' (by removing the preceding # sign) and run the following line after downloading the file
-# from Blackboard and saving it in a folder inside your working directly, called 'data'.
-# (remember to first create the folder if it does not exist
+# IF THE FUNCTION DOES NOT WORK: If you can't get this function to work
+# (sometimes NOAA's servers get overwhelmed), you can 'uncomment' (by removing
+# the preceding # sign) and run the following line after downloading the file
+# from Blackboard and saving it in a folder inside your working directly, called
+# 'data'. (remember to first create the folder if it does not exist
 
 # papoue <- readRDS("./data/papoue.RDS")
 
 # You could also download the file from Github at:
 # https://github.com/ryanreisinger/SOES3056/blob/main/Lab%2004/data/papoue.RDS
 
-# This object is a special kind of raster in marmap's own format. We can see that by asking R about the class:
+# This object is a special kind of raster in marmap's own format. We can see
+# that by asking R about the class:
 class(papoue)
 
 # marmap has its own plotting method, so we can simply type:
@@ -124,7 +128,9 @@ papoue_raster <- marmap::as.raster(papoue)
 class(papoue)
 class(papoue_raster)
 
-# We could use the raster package to analyse this raster now, but remember last week I said that the terra package is the new, future-proof version of raster, so let's convert to a terra raster.
+# We could use the raster package to analyse this raster now, but remember last
+# week I said that the terra package is the new, future-proof version of raster,
+# so let's convert to a terra raster.
 
 # First, load terra
 library(terra)
@@ -147,7 +153,9 @@ plot(papoue_terra,
      main = "Papoue",
      col = topo.colors(125))
 
-# The colour palette is not that smart, it doesn't understand that negative values should be blue. We'll solve that kind of problem later, or you can use marmap to make maps easily
+# The colour palette is not that smart, it doesn't understand that negative
+# values should be blue. We'll solve that kind of problem later, or you can use
+# marmap to make maps easily
 ```
 
 Let's take a look at some of the characteristics of the data we downloaded. Remember in seascape analyses we're interested in the *extent* and *grain* of the data.
@@ -158,7 +166,10 @@ We can get all sorts of information simply by 'printing' the object (typing the 
 # Print the object to get some information about it
 papoue_terra
 
-# Notice the extent and the resolution. Remember that the raster is not projected, so the measurements are all in degrees. So, this raster has a resolution of 0.06 by 0.06 degrees. Remember, we asked for a resolution of 4 minutes (4/60 = 0.06666)
+# Notice the extent and the resolution. Remember that the raster is not
+# projected, so the measurements are all in degrees. So, this raster has a
+# resolution of 0.06 by 0.06 degrees. Remember, we asked for a resolution of 4
+# minutes (4/60 = 0.06666)
 
 # We can also get the values using functions.
 
@@ -168,12 +179,16 @@ res(papoue_terra)
 # Extent
 ext(papoue_terra)
 
-# Minimum and maximum value (this is in meters - the values, or z dimension, of the raster can be in any unit, unlike the x and y measurements that are defined by the coorindate system.
+# Minimum and maximum value (this is in meters - the values, or z dimension, of
+# the raster can be in any unit, unlike the x and y measurements that are
+# defined by the coorindate system.
 
 minmax(papoue_terra)
 
-# We could also look at the distribution of values in a histogram
-# notice that I type 'terra::hist()' - this tells R I want to specifically use the 'hist()' function from the 'terra' package. Sometimes different packages have the same name, and R doesn't always understand which one to use.
+# We could also look at the distribution of values in a histogram notice that I
+# type 'terra::hist()' - this tells R I want to specifically use the 'hist()'
+# function from the 'terra' package. Sometimes different packages have the same
+# name, and R doesn't always understand which one to use.
 terra::hist(papoue_terra)
 
 ```
@@ -194,17 +209,20 @@ Let's classify our bathymetry raster. For a simple classification exercise, we c
 To use the classification function in `terra`, we first have to define the values.
 
 ```{r}
-# The classify function in terra has an argument 'rcl', where we can pass a matrix that defines how we want to classify the matrix. It can have three columns, the first two columns define ranges in the input raster, and the third column defines what cells which fall in that range 'become'.
+# The classify function in terra has an argument 'rcl', where we can pass a
+# matrix that defines how we want to classify the matrix. It can have three
+# columns, the first two columns define ranges in the input raster, and the
+# third column defines what cells which fall in that range 'become'.
 
-# So, let's make a simple one to classify the raster as land and sea. Land values will be positve, and sea values negative.
+# So, let's make a simple one to classify the raster as land and sea. Land
+# values will be positve, and sea values negative.
 
 # We can adapt the example given in the the 'classify' functions help page:
 ?classify # scroll down to the examples
 
-## from-to-becomes
-# classify the values into land and sea.
-# we can't mix numeric and character values here, so we use 1 to indicate sea and 2 to indicate land.
-# all values >= -15,000 and <= -1 become 1, etc.
+## from-to-becomes classify the values into land and sea. we can't mix numeric
+#and character values here, so we use 1 to indicate sea and 2 to indicate land.
+#all values >= -15,000 and <= -1 become 1, etc.
 m <- c(-15000, -1, 1,
        0, +15000, 2)
 reclass_matrix <- matrix(m, ncol=3, byrow=TRUE)
@@ -223,7 +241,8 @@ papoue_classified <- classify(papoue_terra,
 # And let's see what happens when we plot it
 plot(papoue_classified)
 
-# Let's try a slightly more complicated example, where we classify a few bathymetric categories.
+# Let's try a slightly more complicated example, where we classify a few
+# bathymetric categories.
 
 # First, we redefine the matrix, then we classify and plot
 m <- c(-15000, -200, 1,
@@ -238,7 +257,8 @@ plot(papoue_classified)
 
 # I chose 200 m (-200) to approximately represent the continental shelf edge.
 
-# We can turn the raster into a truly categorical raster with factor levels (which work similarly to other factors in R)
+# We can turn the raster into a truly categorical raster with factor levels
+# (which work similarly to other factors in R)
 
 cls <- data.frame(id=1:3, cover=c("deep-sea", "shelf", "land"))
 levels(papoue_classified) <- cls
@@ -256,12 +276,14 @@ Recall from Chapter 2 of the seascape ecology textbook (and Lecture 04), that we
 We can easily calculate some simple morphometrics using the `terrain` function in `terra`.
 
 ```{r}
-# The specific metric we want is set by passing different values to the 'v' argument in the function.
+# The specific metric we want is set by passing different values to the 'v'
+# argument in the function.
 
 # Slope
 plot(terrain(papoue_terra, v = "slope"))
 
-# notice that I am wrapping the function in a plot call to immediately visualise the result. It is not being saved to a named variable in our environment.
+# notice that I am wrapping the function in a plot call to immediately visualise
+# the result. It is not being saved to a named variable in our environment.
 
 # Terrain Roughness Index (TRI)
 plot(terrain(papoue_terra, v = "TRI")) # the output is very similar to slope
