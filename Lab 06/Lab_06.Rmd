@@ -4,9 +4,9 @@ author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
   word_document: default
-  html_document:
-    df_print: paged
   pdf_document:
+    df_print: paged
+  html_document:
     df_print: paged
 subtitle: "Lab 06 - R Markdown"
 highlight: tango
@@ -48,9 +48,9 @@ Xie et al. write:
 
 > R Markdown provides an authoring framework for data science. You can use a single R Markdown file to both
 >
-> -   save and execute code, and
+> - save and execute code, and
 >
-> -   generate high quality reports that can be shared with an audience.
+> - generate high quality reports that can be shared with an audience.
 
 <https://bookdown.org/yihui/rmarkdown/basics.html>
 
