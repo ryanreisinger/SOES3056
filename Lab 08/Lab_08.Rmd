@@ -1,15 +1,14 @@
 ---
 title: "Seascape Ecology"
+subtitle: "Lab 08 - Seascape Change"
 author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
-  word_document: default
-  pdf_document:
-    df_print: paged
   html_document:
     df_print: paged
-subtitle: "Lab 08 - Seascape Change"
-highlight: tango
+  pdf_document:
+    df_print: paged
+  word_document: default
 urlcolor: blue
 linkcolor: blue
 ---
@@ -17,6 +16,16 @@ linkcolor: blue
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+# Learning objectives
+
+By the end of this lab you should be able to:
+
+1.  Compare two time slices of a raster pixel by pixel, and explain how the log transform and the handling of zeros affect that comparison.
+
+2.  Summarise change across several time points in each pixel (variance, Kendall’s tau, regress()), and judge whether your data suit the method.
+
+3.  Apply the same workflow to a new dataset (sea surface temperature, 2010–2020) and describe the change in terms of disturbance type (pulse, press, ramp) and scale.
 
 # Introduction
 
@@ -55,9 +64,8 @@ fish_2016 <- rast("https://github.com/ryanreisinger/whaleKrillOverlap/raw/main/d
 # 2020 season
 fish_2020 <- rast("https://github.com/ryanreisinger/whaleKrillOverlap/raw/main/data_out/ccamlr_fishing_rasters_monthly/2020.tif")
 ```
-If you weren't able to read the files directly into R using the `rast` function, you can download the files from the Github repository, using the links below, and read them in from your local computer. You'll need to change the path to the file to match where you saved it.
-https://github.com/ryanreisinger/whaleKrillOverlap/raw/main/data_out/ccamlr_fishing_rasters_monthly/2020.tif
-https://github.com/ryanreisinger/whaleKrillOverlap/raw/main/data_out/ccamlr_fishing_rasters_monthly/2016.tif
+
+If you weren't able to read the files directly into R using the `rast` function, you can download the files from the Github repository, using the links below, and read them in from your local computer. You'll need to change the path to the file to match where you saved it. <https://github.com/ryanreisinger/whaleKrillOverlap/raw/main/data_out/ccamlr_fishing_rasters_monthly/2020.tif> <https://github.com/ryanreisinger/whaleKrillOverlap/raw/main/data_out/ccamlr_fishing_rasters_monthly/2016.tif>
 
 Let's take a look at the rasters, noting their characteristics.
 
@@ -75,6 +83,7 @@ crs(fish_2016)
 It's WGS 1984, with EPSG code 4326 (<https://www.epsg.io>). You can see the EPSG code in the last slot of the above output, called 'ID'.
 
 You could get the EPSG code directly like this:
+
 ```{r}
 crs(fish_2016, describe = TRUE)$code
 ```
@@ -151,10 +160,19 @@ We can look at the distribution (histogram) of fishing catch values in each rast
 
 ```{r}
 # A simple look
-par(mfrow = c(2, 1)) # split the plotting window into 2 columns, 1 row
+par(mfrow = c(1, 2)) # split the plotting window into 2 columns, 1 row
 terra::density(log_catch_2016)
 terra::density(log_catch_2020)
+par(mfrow = c(1, 1)) # reset the plotting window to 1 column, 1 row
 ```
+
+> **Check your understanding 1.**
+>
+> Why do we add 1 before taking log10?
+>
+> What happens to cells with no fishing?
+>
+> What can the transformed values no longer tell you directly?
 
 Let's try and get a better plot in `ggplot2`.
 
@@ -186,11 +204,13 @@ ggplot(data = values_df, aes(y = catch, colour = year, group = year)) +
   geom_boxplot()
 ```
 
-Let's remove all the pixels with zero catch, and then try the histogram again. Remember, we had already log10 transformed the data after adding 1 to each pixel, so our zero values are now 1 iin the data, because `log10(0 + 1) = 0`. So, let's filter out all zero values, and plot the boxplot again.
+Let's remove all the pixels with zero catch, and then try the histogram again. Remember, we had already log10 transformed the data after adding 1 to each pixel (above, we did `log_catch_2016 <- log10(catch_2016 + 1)`), but `log10(0 + 1) = 0`. So, we can simply filter out all zero values, and plot the boxplot again.
 
 ```{r}
+# Filter out the zeros in catch
 values_df <- dplyr::filter(values_df, catch > 0)
 
+# And plot again
 ggplot(data = values_df, aes(y = catch, colour = year, group = year)) +
   geom_boxplot() +
   labs(title = "Boxplot of log10(krill catch + 1) values",
@@ -198,11 +218,24 @@ ggplot(data = values_df, aes(y = catch, colour = year, group = year)) +
        x = "Year")
 ```
 
+> **Check your understanding 2.**
+>
+> Removing the zeros changed the boxplot.
+>
+> Which cells are you now comparing between years?
+>
+> How could this mislead you about whether fishing increased or decreased?
+
 Now, we can compare the two rasters pixel-wise, simply by taking the difference between them (subtracting one raster from the other). Remember from earlier labs, you can do arithmetic operations on rasters directly, and the operations are done pixel-wise.
 
 ```{r}
 catch_change <- log_catch_2020 - log_catch_2016
-plot(catch_change)
+plot(catch_change) +
+  labs(title = "Change in krill catch",
+       subtitle = "2016 to 2020",
+       x = "Longitude",
+       y = "Latitude")
+
 ```
 
 We can improve the colour scale, but it takes a bit of work. It's simpler to plot this in `ggplot2`, with the help of the `tidyterra` package. The `geom_spatraster()` geometry is what we use to plot a terra raster in ggplot2. We'll also use a spatial colour ramp -- `scale_fill_gradient2()` -- to get a colour scale with blue for low and red for high values.
@@ -217,11 +250,16 @@ ggplot() +
     na.value = "grey",
     name = "Change in catch (log10(kg + 1))"
   ) +
-  labs(main = "Change in krill catch",
-       sub = "2016 to 2020",
+  labs(title = "Change in krill catch",
+       subtitle = "2016 to 2020",
        x = "Longitude",
        y = "Latitude")
 ```
+
+> **Check your understanding 3.**
+>
+> White cells mean zero change. Does that mean the same amount of fishing in both years?
+> Give two reasons a cell might be white, and say how you could tell them apart on the map.
 
 ## Several points in time
 
@@ -233,18 +271,18 @@ Let's look at the 2020 catch:
 nlyr(fish_2020)
 ```
 
-Remember, the values are highly skewed, so let's work with log10 from now on.
+Remember, the values are highly skewed, so let's work with the log10-transformed data from now on.
 
 ```{r}
-fish_2016 <- log10(fish_2016 + 1)
-fish_2020 <- log10(fish_2020 + 1)
+log_fish_2016 <- log10(fish_2016 + 1)
+log_fish_2020 <- log10(fish_2020 + 1)
 ```
 
-First, let's compare the values in each time period, like we did above, but for the 8 months. You'll notice that in this chunk we convert a dataframe from a 'wide' to a 'long' format. The 'long' format is preferred by ggplot and the tidyverse packages, and many people find it easier to work with. Wickham et al. call this format 'tidy data': <https://r4ds.had.co.nz/tidy-data.html>. They discuss 'pivoting' - changing from wide to long - here: <https://r4ds.had.co.nz/tidy-data.html#pivoting>. We'll use the `pivot_longer()` function from the `tidyr` package (<https://tidyr.tidyverse.org/reference/pivot_longer.html>).
+First, let's compare the values in each time period, like we did above, but for all 8 months. You'll notice that in this chunk we convert a dataframe from a 'wide' to a 'long' format. The 'long' format is preferred by ggplot and the tidyverse packages, and many people find it easier to work with. Wickham et al. call this format 'tidy data': <https://r4ds.had.co.nz/tidy-data.html>. They discuss 'pivoting' - changing from wide to long - here: <https://r4ds.had.co.nz/tidy-data.html#pivoting>. We'll use the `pivot_longer()` function from the `tidyr` package (<https://tidyr.tidyverse.org/reference/pivot_longer.html>): you are 'pivoting' from 'wide' to 'long' data.
 
 ```{r}
 # Get the values from the raster
-fish_month_values <- values(fish_2020)
+fish_month_values <- values(log_fish_2020)
 
 # Notice, that this is a matrix rather than a vector,
 # because we have 8 layers in the raster
@@ -254,7 +292,7 @@ class(fish_month_values)
 fish_month_values <- as.data.frame(fish_month_values)
 
 # Change from 'wide' (lots of columns) to 'long' (only a few columns) format for plotting in ggplot
-# Take some time to read the pivot_longer help,
+# Take some time to read the pivot_longer help
 # to understand what's happening here
 # Note the use of the function everything() to select all columns
 # names_to and values_to are arguments that tell the function what to call the new columns
@@ -265,7 +303,7 @@ fish_month_values <- pivot_longer(fish_month_values,
 # Look at the structure now
 head(fish_month_values)
 
-# Remember the months refer to month within a fishing season, so '1' is
+# Remember the months refer to month _within_ a fishing season, so '1' is
 # December, not January
 
 # Now we can plot this dataframe
@@ -273,14 +311,13 @@ ggplot(data = fish_month_values, aes(y = catch, x = month, colour = month, fill 
   geom_boxplot()
 ```
 
-Despite the distribution still being skewed even after taking the log (the 'boxes' in the boxplots are all pretty much the same), we can see lots of outliers in months 4, 5 and 6 of the season (so, March, April and May), with a peak in high catches in May ('2020_5'). If we wanted to, we could use the technique as above to filter out the zero values from the dataframe.
+Despite the distribution still being skewed even after taking the log (the 'boxes' in the boxplots are all pretty much the same), we can see lots of outliers in months 4, 5 and 6 of the season (so, March, April and May), with a peak in high catches in May ('2020_6'). If we wanted to, we could use the technique as above to filter out the zero values from the dataframe.
 
-
-Let's assume we want to fit some kind of trendline across the months (the trend in fishing over the year). The first thing we need to do is give our dataframe integer values for the months (currently they are character values). We'll use the `mutate()` and `case_when()` functions. I always find this explainer helpful when using the `case_when` function:
+Let's assume we want to fit some kind of trendline across the months (the trend in fishing over the season). The first thing we need to do is give our dataframe integer values for the months (currently they are character values, which won't make sense in a linear model). We'll use the `mutate()` and `case_when()` functions. I always find this explainer incdrebily helpful when using the `case_when` function:
 
 ![How to use case_when(). Artwork by Alison Horst <https://allisonhorst.com/allison-horst>.](Resources/AlisonHorst_case_when.png)
 
-We'll use that example to add our new column for month.
+We'll use that example to add our new column for month. Again, remember that the months refer to month *within* a fishing season, so '1' is December, not January.
 
 ```{r}
 fish_month_values <-
@@ -295,7 +332,7 @@ fish_month_values <-
                                   month == "2020_8" ~ 8))
 ```
 
-And now plot it as a scatter plot, fitting a GAM (generalised additive model) trendline.
+And now plot it as a scatter plot, fitting a GAM (generalised additive model) trendline. If you want to learn more about GAMs, check out the [model building chapter in the R for Data Science book](https://r4ds.had.co.nz/model-building.html)
 
 ```{r}
 ggplot(data = fish_month_values, aes(x = month_number, y = catch)) +
@@ -303,17 +340,19 @@ ggplot(data = fish_month_values, aes(x = month_number, y = catch)) +
   geom_smooth(method = "gam", method.args = list("k" = 5))
 ```
 
-Unfortunately, in this case the computation of the gam smooth fails, probably because there are only three months with data. We can try a linear model instead, setting `method = "lm"`. Let's also filter out the zero values.
+Unfortunately, in this case the computation of the gam smooth fails, probably because there are only three months with data (March, April and May). We can try a linear model instead, setting `method = "lm"`. Let's also filter out the zero values.es.
 
 ```{r}
-fish_month_values_no_zeros <- filter(fish_month_values, catch > 0) # Filter out the zeros in catch
+# Filter out the zeros in catch
+fish_month_values_no_zeros <- filter(fish_month_values, catch > 0)
 
+# Plot the scatter plot with a linear model trendline
 ggplot(data = fish_month_values_no_zeros, aes(x = month_number, y = catch)) +
   geom_point() +
   geom_smooth(method = "lm")
 ```
 
-That's better. We can now see that there is a linear increase in catch from April to June.
+That's better. We can now see that there is a linear increase in catch from March to May.
 
 In the 'try for yourself' section, you can have a go at following these steps with a different dataset...
 
@@ -323,31 +362,33 @@ We can look at a few metrics to tell us a bit about the time series in each pixe
 fish_2020_variance <- app(fish_2020, fun = "var") # Note use of the 'app' function to 'apply' the specific function to the raster stack
 plot(fish_2020_variance)
 ```
-In the plot you can see that the area around -63 degrees S and (y-axis) and -58 degrees E (x-axis) has the highest variance in fishing catch over the months.
+
+In the plot you can see that the area around -63 degrees (63 degrees S) and (y-axis) and -58 degrees (58 degrees E) (x-axis) has the highest variance in fishing catch over the months.
 
 We could look at the trend in each pixel (rather than the overall trend, as we did above), using two methods.
 
-The first is a spatial version of Kendall's Tau. The function we could use is `tau` from `terra`. This calculates the trend in each pixel. (You will get warnings running this, you can safely ignore them).
+The first is a spatial version of Kendall's Tau. The function we could use is `cor` from `terra`, setting `method = "kendall"`. This calculates the trend in each pixel. (You will get warnings running this, you can safely ignore them).
 
-Running this next block produces lots of warnings that I don't want to include in my final knitted document, so I have included `warning=FALSE` in the chunk options for this chunk, like this: ```{r warning=FALSE}```
+Running this next block produces lots of warnings that I don't want to include in my final knitted document, so I have included `warning=FALSE` in the chunk options for this chunk, like this: `{r warning=FALSE}`
 
 ```{r warning = FALSE}
 # layer index as time (1:8)
-time <- 1:nlyr(fish_2020)
-# run the function
-tau <- app(fish_2020, fun = function(x) cor(x, time, method = "kendall"))
+fish_time <- 1:nlyr(fish_2020)
+
+# run the function, we use the 'app' function to apply the function to each pixel in the raster stack
+tau <- app(fish_2020, fun = function(x) cor(x, fish_time, method = "kendall"))
+
 # plot the result
 plot(tau)
 ```
 
-
 We could also use the `regress()` function in `terra`, which runs a linear regression (linear model) for each pixel in the raster. We can then plot the slope and intercept of the regression line.
 
 ```{r}
-fish_trend <- regress(fish_2020, 1:nlyr(fish_2020)) # This works.
+fish_trend <- regress(fish_2020, 1:nlyr(fish_2020))
 plot(fish_trend)
 
-# X is the slope of the regression line, and intercept is the intercept of the regression
+# In the plot, Intercept is the intercept of the regression, and x is the slope of the regression line
 ```
 
 # Try for yourself
@@ -356,8 +397,7 @@ The last two steps were only moderately successful, because of the kind of data 
 
 I've uploaded a set of sea surface temperature files for the eastern North Pacific to Github. I add the daily sea surface temperature on 15 September for each year from 2010-2020 (11 files). Think Marine Heatwaves... ([Oliver et al. 2021](https://doi.org/10.1146/annurev-marine-032720-095144)).
 
-Here is the first example of how you could access the files, directly, or you can download them from the GitHub repository and read them in from your own computer. Remember to change the path to the file to wherever you have saved it. The folder containing the files is:
-https://github.com/ryanreisinger/SOES3056/raw/main/Lab_08/Resources/annual_sst/
+Here is the first example of how you could access the files, directly, or you can download them from the GitHub repository and read them in from your own computer. Remember to change the path to the file to wherever you have saved it. The folder containing the files is: <https://github.com/ryanreisinger/SOES3056/raw/main/Lab%2008/Resources/annual_sst/>
 
 ```{r}
 sst_2010 <- rast("https://github.com/ryanreisinger/SOES3056/raw/main/Lab%2008/Resources/annual_sst/sst_2010.tif")
@@ -366,3 +406,35 @@ plot(sst_2010)
 
 
 ```
+
+# Answers to 'check your understanding'
+
+## Check your understanding 1
+
+- log10(0) is undefined.
+
+- Zeros stay zero after the transform.
+
+- Differences are now on a log scale, not in kg. A rise from 1 to 10 kg looks the same as one from 100 to 1000 kg.
+
+## Check your understanding 2
+
+- Each year now contains only the cells that were fished that year, so the sets of cells differ.
+
+- The comparison is of intensity in fished cells, not of extent.
+
+- A fishery can concentrate (fewer cells, higher catch), so the median can rise while the fished area shrinks. This links to the paper’s point about increasing concentration.
+
+## Check your understanding 3
+
+- A cell can be white because it had no fishing in either year, or because catch was equal.
+
+- How to detect the difference? Mask cells that are zero in both years (set to NA), or classify cells as gained, lost or stable (remember lost v. fragmentation from the lecture).
+
+## Check your understanding 4
+
+- The answer here would depend on the specific data. If one or two years stand out, the answer may be a pulse; if the series rises steadily, a ramp.
+
+- A good answer would use the 11-year series to show how two time slices can miss or distort the pattern.
+
+- Does 2014–2016 stand out? This could be linked to 'The Blob' a severe heatwave in the Northeast Pacific: [Oliver et al. 2021](https://doi.org/10.1146/annurev-marine-032720-095144).
