@@ -200,7 +200,7 @@ ggplot(data = values_df, aes(x = catch, colour = year, fill = year, group = year
 It's tricky to compare the distributions because they are so skewed. We can try boxplots, but they don't help much in this case.
 
 ```{r}
-ggplot(data = values_df, aes(y = catch, colour = year, group = year)) +
+ggplot(data = values_df, aes(y = catch, x = year, colour = year, group = year)) +
   geom_boxplot()
 ```
 
