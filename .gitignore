@@ -37,3 +37,6 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# Folder with seabed classification data
+/Lab 09/data//EUSeaMap_2025/
