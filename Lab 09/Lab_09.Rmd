@@ -3,9 +3,9 @@ title: 'Lab 09: Patch metrics'
 author: "Ryan Reisinger"
 date: "`r Sys.Date()`"
 output:
-  html_document: default
   pdf_document:
     latex_engine: xelatex
+  html_document: default
   word_document: default
 params:
   show_answers: false
